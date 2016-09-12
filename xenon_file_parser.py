@@ -3,6 +3,7 @@ import sys
 
 from datatypes import *
 from commands import *
+from command_bindings import getParser, getCommandClass
 
 class XenonFileParser(object):
   """ The parsed contents of a sweep file.  """
@@ -12,24 +13,8 @@ class XenonFileParser(object):
     self.filename = filename
     # List of (line_number, ParseResult) tuples.
     self.commands_ = []
-    # Dict of commands to their parser objects.
-    self.command_parsers_ = {}
     # Parser object for the complete line.
     self.line_parser_ = buildCommandParser()
-
-    self.buildCommandParsers_()
-
-  def buildCommandParsers_(self):
-    self.command_parsers_[CMD_BEGIN] = buildBeginParser()
-    self.command_parsers_[CMD_END] = buildEndParser()
-    self.command_parsers_[CMD_SWEEP] = buildSweepParser()
-    self.command_parsers_[CMD_SET] = buildSetParser()
-    # self.command_parsers_[CMD_REQUIRE] = buildRequireParser()
-    self.command_parsers_[CMD_GENERATE] = buildGenerateParser()
-
-  def buildActionTable_(self):
-    self.action_table_[CMD_BEGIN] = "initializeSweep"
-    self.action_table_[CMD_END] = "endSweep"
 
   def printException_(self, err, line, line_number, msg=""):
     """ Prints exception with pointer to error column. """
@@ -41,18 +26,18 @@ class XenonFileParser(object):
     print str(err)
     print ""
 
-  def createCommand(self, parse_result):
-    if parse_result.command == CMD_BEGIN:
-      return BeginCommand(parse_result)
-    elif parse_result.command == CMD_END:
-      return EndCommand(parse_result)
-    elif parse_result.command == CMD_SET:
-      return SetCommand(parse_result)
-    elif parse_result.command == CMD_GENERATE:
-      return GenerateCommand(parse_result)
-    elif parse_result.command == CMD_SWEEP:
-      return SweepCommand(parse_result)
-    return None
+  # def createCommand(self, parse_result):
+  #   if parse_result.command == CMD_BEGIN:
+  #     return BeginCommand(parse_result)
+  #   elif parse_result.command == CMD_END:
+  #     return EndCommand(parse_result)
+  #   elif parse_result.command == CMD_SET:
+  #     return SetCommand(parse_result)
+  #   elif parse_result.command == CMD_GENERATE:
+  #     return GenerateCommand(parse_result)
+  #   elif parse_result.command == CMD_SWEEP:
+  #     return SweepCommand(parse_result)
+  #   return None
 
   def parse(self):
     with open(self.filename) as f:
@@ -76,7 +61,7 @@ class XenonFileParser(object):
         try:
           # Reform the line without the comments.
           line = result.command + ' ' + ' '.join(result.rest[0])
-          result = self.command_parsers_[result.command].parseString(line, parseAll=True)
+          result = getParser(result.command).parseString(line, parseAll=True)
           # print result.constant, result.expression
           print type(result.expression)
         except pp.ParseException as x:
@@ -84,7 +69,7 @@ class XenonFileParser(object):
           sys.exit(1)
 
         # Add this to commands_.
-        # command = self.createCommand(result)
+        # command = getCommandClass(result)
         self.commands_.append((line_number, result))
 
   def execute(self):
@@ -93,4 +78,5 @@ class XenonFileParser(object):
       action_func = getattr(current_sweep, self.action_table_[command.command])
       action_func(command)
 
+      # Need to catch Xenon Exceptions
 

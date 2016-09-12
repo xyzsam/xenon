@@ -7,6 +7,7 @@ CMD_SWEEP = "sweep"
 CMD_SET = "set"
 CMD_REQUIRE = "require"
 CMD_GENERATE = "generate"
+CMD_USE = "use"
 
 KW_FOR = "for"
 KW_FROM = "from"
@@ -23,6 +24,7 @@ commands = [
     CMD_SET,
 #    CMD_REQUIRE,
     CMD_GENERATE,
+    CMD_USE,
 ]
 
 other_keywords = [
@@ -63,10 +65,12 @@ def buildKeywords():
   for other in other_keywords:
     keywords[other] = CaselessKeyword(other).setResultsName(other)
 
+buildKeywords()
+
 def buildBeginParser():
   # Sweep names must begin with letters.
   sweepname = ident.setResultsName("sweep_name")
-  begin_statement = keywords["begin"] + keywords["sweep"] + sweepname + comment + EOL
+  begin_statement = keywords[CMD_BEGIN] + keywords[CMD_SWEEP] + sweepname + comment + EOL
   return begin_statement
 
 def buildEndParser():
@@ -108,7 +112,7 @@ def buildSetParser():
   """
   selection = buildSelectionParser()
   constant = Word(nums + ".").setResultsName("constant")
-  stringValue = string.setResultsName("string") 
+  stringValue = string.setResultsName("string")
   expression = buildExpressionParser().setResultsName("expression")
   set_parser = (
       keywords["set"] +
@@ -148,8 +152,27 @@ def buildSweepParser():
   """
   selection = buildSelectionParser()
   sweep_range = buildRangeParser()
-  sweep_parser = keywords["sweep"] + ident.setResultsName("sweep_param") + Optional(selection) + sweep_range
+  sweep_parser = (
+      keywords["sweep"] + ident.setResultsName("sweep_param") +
+      Optional(selection) + sweep_range)
   return sweep_parser
+
+def buildUseParser():
+  """ A use command is specified by the following BNF:
+
+  package = ident
+  use = "use" package[.package ...]
+
+  The use command behaves in a similar way as the Python import keyword, with
+  the following differences:
+     - All use statements implicitly import everything (.*) inside the lowest
+       specified package/module into the global namespace, so wildcards are not
+       allowed.
+     - Packages cannot be renamed with `as`.
+  """
+  package_path = Group(delimitedList(ident, delim=".")).setResultsName("package_path")
+  use_parser = keywords["use"] + package_path
+  return use_parser
 
 def buildCommandParser():
   """ Parses a complete command line.

@@ -1,8 +1,10 @@
 import pyparsing as pp
+import sys
 
-from parser_builders import *
+from parsers import *
 from commands import *
-from datatypes import SweepConfigFileParser, DesignSweep
+from datatypes import DesignSweep
+from xenon_file_parser import XenonFileParser
 
 def tryTest(parser, text):
   """ Returns whether the text was successfully parsed by parser or not. """
@@ -72,12 +74,12 @@ def testCommandParser():
                ("end sweep", True),
                ("end", True),
                ("invalid command", False),
-               ("require something something something", True),
+               # ("require something something something", True),
+               # ("require (expression)", True),
                ("# This is a comment.", True),
                ("generate trace", True),
                ("generate trace # And a comment", True),
                ("output something", False),
-               ("require expression", True),
                ("sweep something", True),
                ("condor this and that", False),
               ]
@@ -164,19 +166,30 @@ def testSweepParser():
                ]
   tryAllTestCases("sweep", sweep_parser, testcases)
 
+def testUseParser():
+  use_parser = buildUseParser()
+  testcases = [("use package", True),
+               ("use package_name.module", True),
+               ("use package.subpackage.module", True),
+               ("use", False),
+               ("use package.*", False),
+               ("use package.something.*", False),
+               ]
+  tryAllTestCases("use", use_parser, testcases)
+
 def getInitializedSweep(sweep_name):
   """ Return an initialized sweep. Consider putting this in DesignSweep. """
   sweep = DesignSweep()
   begin_parser = buildBeginParser()
   results = begin_parser.parseString("begin sweep %s" % sweep_name, parseAll=True)
-  begin_command = BeginCommand(results)
+  begin_command = BeginCommand(0, results)
   begin_command(sweep)
   return sweep
 
 def closeSweep(sweep):
   end_parser = buildEndParser()
   results = end_parser("end sweep")
-  end_command = EndCommand(results)
+  end_command = EndCommand(0, results)
   end_command(sweep)
 
 def testBeginAndEndCommands():
@@ -187,24 +200,36 @@ def testBeginAndEndCommands():
   closeSweep(sweep)
   assert(sweep.done == True)
 
+def testUseCommand():
+  sys.path.append("/group/vlsiarch/samxi/active_projects/gem5-stable/sweeps")
+  sweep = getInitializedSweep("mysweep")
+  use_parser = buildUseParser()
+  results = use_parser.parseString("use benchmark_configs.machsuite_config")
+  use_command = UseCommand(0, results)
+  use_command(sweep)
+
+  assert("aes_aes" in sweep.__dict__)
+  assert("md_knn" in sweep.__dict__)
+  assert("DMA" in sweep.__dict__)
+
 def testSimpleSetCommands():
   """ Simple == no selections or expressions. """
   sweep = getInitializedSweep("mysweep")
   set_parser = buildSetParser()
   results = set_parser.parseString("set output_dir \"path\"")
-  set_command = SetCommand(results)
+  set_command = SetCommand(0, results)
   set_command(sweep)
   assert(sweep.output_dir == "path")
 
   results = set_parser.parseString("set output_dir \"path/to/output\"")
-  set_command = SetCommand(results)
+  set_command = SetCommand(0, results)
   set_command(sweep)
   assert(sweep.output_dir == "path/to/output")
 
 def runCommandTests():
   testBeginAndEndCommands()
   testSimpleSetCommands()
-
+  testUseCommand()
   print "All tests passed!"
 
 
@@ -217,9 +242,10 @@ def runParsingTests():
   testRangeParser()
   testSweepParser()
   testCommandParser()
+  testUseParser()
 
 def testParseFile(filename):
-  parser = SweepConfigFileParser(filename)
+  parser = XenonFileParser(filename)
   parser.parse()
 
 def main():

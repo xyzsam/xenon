@@ -4,6 +4,7 @@ import pyparsing as pp
 
 from commands import *
 from parsers import *
+from xenon_exceptions import *
 
 # class ArrayType(object):
 #   def __init__(self):
@@ -17,10 +18,6 @@ from parsers import *
 #   def __init__(self):
 #     return
 #
-class SweepNotInitializedException(Exception):
-  def __init__(self):
-    super(SweepNotInitializedException, self).__init__(
-        "Sweep has not been initialized with a begin statement.")
 
 # TODO: Needs to implement __contains__, __getitem__, and __setitem__
 class DesignSweep(object):
@@ -44,4 +41,4 @@ class DesignSweep(object):
 
   def checkInitializedAndRaise_(self):
     if self.name == None:
-      raise SweepNotInitializedException()
+      raise SweepNotInitializedError()
