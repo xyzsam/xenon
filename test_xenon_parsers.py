@@ -2,7 +2,7 @@ import pyparsing as pp
 
 from parsers import *
 from commands import *
-from datatypes import DesignSweep
+from base_datatypes import DesignSweep
 from xenon_file_parser import XenonFileParser
 
 def tryTest(parser, text):
@@ -115,8 +115,12 @@ def testSelectionParser():
                ("for benchmark_name.func_name_123", True),
                ("for benchmark_name.func_name_123.array3", True),
                ("for benchmark_name.func_name_123.*", True),
+               ("for benchmark_name.**", True),
+               ("for benchmark_name.func_name.**", True),
                ("for *", True),
+               ("for **", True),
                ("for *.*", False),
+               ("for *.**", False),
                ("for *.*.*", False),
                ("for *.something", False),
                ("for *Bad.*.*", False),
@@ -211,7 +215,7 @@ def testParseFile(filename):
 def main():
   buildKeywords()
   runParsingTests()
-  testParseFile("example.sweep")
+  testParseFile("example.xenon")
 
 if __name__ == "__main__":
   main()

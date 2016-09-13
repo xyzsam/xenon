@@ -5,8 +5,13 @@ import pyparsing as pp
 import xenon_exceptions as xe
 from parsers import *
 from expressions import Expression
+from base_datatypes import XenonObj
 
-class Command(object):
+def get_non_special_attr_values(obj, objtype=object):
+  return [getattr(obj, attr) for attr in dir(obj)
+          if not attr.startswith("__") and isinstance(getattr(obj, attr), objtype)]
+
+class Command(XenonObj):
   """ Commands describe an action to perform on a sweep.
 
   Subclasses must implement the execute method, which can take an arbitrary
@@ -43,37 +48,51 @@ class SelectionCommand(Command):
     # be resolved later.
     self.selected_objs = None
 
-  def get_non_special_attr_values(self, obj):
-    return [getattr(obj, attr) for attr in dir(obj)
-            if not attr.startswith("__") and not callable(getattr(obj, attr))]
-
+  def selectRecursive(self, root):
+    """ Recursively selects all attributes of type XenonObj from root. """
+    selected_objs = []
+    for obj in get_non_special_attr_values(root, objtype=XenonObj):
+      # Safety check to avoid infinite recursion.
+      if obj == root:
+        continue
+      selected_objs.append(obj)
+      selected_objs.extend(self.selectRecursive(obj))
+    return selected_objs
+     
   def select(self, env):
     """ Return a list of objects in an environment selected by this selection.
 
     The environment is a dict-like object in that it must support the in and []
     operators, and it must return an object that does the same.
     """
+    if not isinstance(env, XenonObj):
+      raise xe.NotXenonObjError(env)
+
     if len(self.tokens) == 0:
       # If there was no selection defined, then the selection is implicitly the
       # entire environment.
       return [env]
 
-    if self.tokens[0] == KW_STAR:
-      # If the selection was "*", then return all first level objects under the
-      # environment.
-      return self.get_non_special_attr_values(env)
+    # if self.tokens[0] == LIT_STAR:
+    #   # If the selection was "*", then return all first level objects under the
+    #   # environment.
+    #   return get_non_special_attr_values(env, objtype=XenonObj)
 
     current_view = env
-    for token in self.tokens:
-      if token == KW_STAR:
+    for i, token in enumerate(self.tokens):
+      if token == LIT_STAR or token == LIT_STARSTAR:
         break
       try:
         current_view = getattr(current_view, token)
       except AttributeError:
         raise xe.XenonSelectionError(".".join(self.tokens))
+      if not isinstance(current_view, XenonObj):
+        raise xe.NotXenonObjError(".".join(self.tokens[:i+1]))
 
-    if token == KW_STAR:
-      self.selected_objs = self.get_non_special_attr_values(current_view)
+    if token == LIT_STAR:
+      self.selected_objs = get_non_special_attr_values(current_view, objtype=XenonObj)
+    elif token == LIT_STARSTAR:
+      self.selected_objs = self.selectRecursive(current_view)
     else:
       self.selected_objs = [current_view]
     return self.selected_objs
@@ -133,15 +152,15 @@ class SetCommand(Command):
       value = self.value
 
     selected_objs = self.selection(sweep_obj)
-    is_applied_at_least_once = False
+    is_applied = False
     for obj in selected_objs:
       try:
-        obj.__setattr__(self.param, value)
-        is_applied_at_least_once = True
+        setattr(obj, self.param, value)
+        is_applied = True
       except AttributeError as e:
         continue
 
-    if not is_applied_at_least_once:
+    if not is_applied:
       print ("Warning: did not find any objects in the provided sweep for which "
              "the parameter {0} could be set to {1}".format(self.param, self.value))
 
@@ -181,11 +200,23 @@ class GenerateCommand(Command):
 class SweepCommand(Command):
   def __init__(self, line, arg, sweep_range, selection=None):
     super(SweepCommand, self).__init__(line, parse_result)
-    self.sweep_start = parse_result.start
-    self.sweep_end = parse_result.end
+    self.sweep_start = float(parse_result.start)
+    self.sweep_end = float(parse_result.end)
+    self.step_type = float(parse_result.step)
     self.step_type = parse_result.step_type
     self.sweep_param = parse_result.sweep_param
     self.selection = SelectionCommand(line, parse_result.selection)
 
   def execute(self, sweep_obj):
-    pass
+    selected_objs = self.selection(sweep_obj)
+    for obj in selected_objs:
+      is_applied_at_least_once = False
+      try:
+        obj.setSweepParameter(self.sweep_param, self.sweep_start, self.sweep_end,
+                              self.step, self.step_type)
+      except xe.XenonInvalidSweepParameterError:
+        continue
+      is_applied_at_least_once = True
+
+    if not is_applied_at_least_once:
+      print ("Warning: did not find any objects with sweepable parameter %s" % self.sweep_param)

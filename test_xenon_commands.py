@@ -6,7 +6,7 @@ import unittest
 
 from parsers import *
 from commands import *
-from datatypes import DesignSweep
+from base_datatypes import DesignSweep
 import command_bindings
 
 def createFakeSweepEnviron(sweep):
@@ -126,19 +126,50 @@ class SelectionCommand(CommandTestCase):
     super(SelectionCommand, self).setUp()
     createFakeSweepEnviron(self.sweep)
 
-  def runTest(self):
+  def test_non_recursive(self):
     selected_objs = self.executeCommand("", command_type=KW_FOR)
+    self.assertEqual(len(selected_objs), 1)
     self.assertEqual(selected_objs[0], self.sweep)
 
     selected_objs = self.executeCommand("for *", command_type=KW_FOR)
-    self.assertIn(self.sweep.top0, selected_objs)
+    self.assertEqual(len(selected_objs), 1)
+    self.assertNotIn(self.sweep.top0, selected_objs)
     self.assertIn(self.sweep.top1, selected_objs)
 
     selected_objs = self.executeCommand("for top1.*", command_type=KW_FOR)
-    self.assertIn(self.sweep.top1.middle0, selected_objs)
+    self.assertEqual(len(selected_objs), 2)
+    self.assertNotIn(self.sweep.top1.middle0, selected_objs)
+    self.assertIn(self.sweep.top1.middle1, selected_objs)
+    self.assertIn(self.sweep.top1.middle2, selected_objs)
 
-    selected_objs = self.executeCommand("for top1.middle0", command_type=KW_FOR)
-    self.assertIn(self.sweep.top1.middle0, selected_objs)
+    with self.assertRaises(xe.NotXenonObjError):
+      selected_objs = self.executeCommand("for top1.middle0", command_type=KW_FOR)
+      self.assertEqual(len(selected_objs), 0)
+    # self.assertIn(self.sweep.top1.middle0, selected_objs)
+
+  def test_recursive(self):
+    selected_objs = self.executeCommand("for **", command_type=KW_FOR)
+    self.assertEqual(len(selected_objs), 3)
+    self.assertIn(self.sweep.top1, selected_objs)
+    self.assertIn(self.sweep.top1.middle1, selected_objs)
+    self.assertIn(self.sweep.top1.middle2, selected_objs)
+    self.assertNotIn(self.sweep.top0, selected_objs)
+    self.assertNotIn(self.sweep.top1.middle0, selected_objs)
+
+    selected_objs = self.executeCommand("for top1.**", command_type=KW_FOR)
+    self.assertEqual(len(selected_objs), 2)
+    self.assertIn(self.sweep.top1.middle1, selected_objs)
+    self.assertIn(self.sweep.top1.middle2, selected_objs)
+    self.assertNotIn(self.sweep.top1.middle0, selected_objs)
+
+
+class SweepCommand(CommandTestCase):
+  def setUp(self):
+    super(SweepCommand, self).setUp()
+    createFakeSweepEnviron(self.sweep)
+
+  def test_global_sweep(self):
+    pass
 
 if __name__ == "__main__":
   unittest.main()

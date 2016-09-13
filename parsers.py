@@ -13,9 +13,11 @@ KW_FOR = "for"
 KW_FROM = "from"
 KW_TO = "to"
 KW_ALL = "all"
-KW_STAR = "*"
 KW_LINSTEP = "linstep"
 KW_EXPSTEP = "expstep"
+
+LIT_STAR = "*"
+LIT_STARSTAR = "**"  # Recursive version of LIT_STAR.
 
 commands = [
     CMD_BEGIN,
@@ -32,9 +34,13 @@ other_keywords = [
     KW_FROM,
     KW_TO,
     KW_ALL,
-    KW_STAR,
     KW_LINSTEP,
     KW_EXPSTEP,
+]
+
+special_literals = [
+    LIT_STAR,
+    LIT_STARSTAR,
 ]
 
 # attributes = [
@@ -48,7 +54,7 @@ other_keywords = [
 #     "condor",
 # ]
 
-keywords = {}
+reserved = {}
 
 SOL = LineStart()
 EOL = LineEnd()
@@ -59,38 +65,42 @@ comment = Optional(pythonStyleComment).setResultsName("comment")
 set_value = Word(alphanums, alphanums + "/")
 
 def buildKeywords():
-  global keywords
+  global reserved
   for command in commands:
-    keywords[command] = CaselessKeyword(command).setResultsName("command")
+    reserved[command] = CaselessKeyword(command).setResultsName("command")
   for other in other_keywords:
-    keywords[other] = CaselessKeyword(other).setResultsName(other)
+    reserved[other] = CaselessKeyword(other).setResultsName(other)
+  for literal in special_literals:
+    reserved[literal] = Literal(literal)
 
 buildKeywords()
 
 def buildBeginParser():
   # Sweep names must begin with letters.
   sweepname = ident.setResultsName("sweep_name")
-  begin_statement = keywords[CMD_BEGIN] + keywords[CMD_SWEEP] + sweepname + comment + EOL
+  begin_statement = reserved[CMD_BEGIN] + reserved[CMD_SWEEP] + sweepname + comment + EOL
   return begin_statement
 
 def buildEndParser():
-  end_statement = keywords["end"] + keywords["sweep"] + comment + EOL
+  end_statement = reserved["end"] + reserved["sweep"] + comment + EOL
   return end_statement
 
 def buildGenerateParser():
-  generate_parser = keywords["generate"] + ident.setResultsName("target")
+  generate_parser = reserved["generate"] + ident.setResultsName("target")
   return generate_parser
 
 def buildSelectionParser():
   """ A selection is an optional statement of the following form:
 
-  selection = ["for" + ("*" | ((ident + ".") ...) ["*"])]
+  selection = ["for" + ("**" | "*" | ((ident + ".") ...) ["**" | "*"])]
   """
+  # Try to match the double ** first before the single *.
+  star_literals = reserved[LIT_STARSTAR] | reserved[LIT_STAR]
   selection_path = (
-      Group(Literal("*")) |
-      Group(delimitedList(ident, delim=".") + Optional(Literal(".").suppress() + Literal ("*")))
+      Group(star_literals) |
+      Group(delimitedList(ident, delim=".") + Optional(Literal(".").suppress() + star_literals))
       ).setResultsName("selection")
-  selection = Optional(keywords["for"] + selection_path)
+  selection = Optional(reserved["for"] + selection_path)
   return selection
 
 def buildExpressionParser():
@@ -99,7 +109,7 @@ def buildExpressionParser():
   It will be parsed to create a mathematical expression tree which will then be
   evaluated.
   """
-  kws = MatchFirst(map(CaselessKeyword, [k for k in keywords.iterkeys()]))
+  kws = MatchFirst(map(CaselessKeyword, [k for k in reserved.iterkeys()]))
   valid_expression = Group(OneOrMore(Word(alphanums + "()/+-<>=._")))
   # return ~kws + valid_expression.setResultsName("expression") #.setParseAction(convertToExpressionTree)
   return valid_expression.setResultsName("expression").setParseAction(convertToExpressionTree)
@@ -117,7 +127,7 @@ def buildSetParser():
   stringValue = string.setResultsName("string")
   expression = buildExpressionParser().setResultsName("expression")
   set_parser = (
-      keywords["set"] +
+      reserved["set"] +
       ident.setResultsName("param") +
       selection +
       (constant | stringValue | expression)
@@ -133,13 +143,13 @@ def buildRangeParser():
   step = "linstep" | "expstep"
   range = "from" start "to" end [step amount]
   """
-  step_type = keywords["linstep"] | keywords["expstep"]
+  step_type = reserved["linstep"] | reserved["expstep"]
   step = Group(step_type.setResultsName("step_type") +
                Word(nums).setResultsName("step_amount"))
   range_parser = Group(
-      keywords["from"] +
+      reserved["from"] +
       Word(nums).setResultsName("start") +
-      keywords["to"] +
+      reserved["to"] +
       Word(nums).setResultsName("end") +
       Optional(step, default=["linstep", "1"]))
   return range_parser
@@ -155,7 +165,7 @@ def buildSweepParser():
   selection = buildSelectionParser()
   sweep_range = buildRangeParser()
   sweep_parser = (
-      keywords["sweep"] + ident.setResultsName("sweep_param") +
+      reserved["sweep"] + ident.setResultsName("sweep_param") +
       selection + sweep_range)
   return sweep_parser
 
@@ -173,7 +183,7 @@ def buildUseParser():
      - Packages cannot be renamed with `as`.
   """
   package_path = Group(delimitedList(ident, delim=".")).setResultsName("package_path")
-  use_parser = keywords["use"] + package_path
+  use_parser = reserved["use"] + package_path
   return use_parser
 
 def buildCommandParser():
