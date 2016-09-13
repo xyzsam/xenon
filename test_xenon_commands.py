@@ -16,7 +16,7 @@ class CommandTestCase(unittest.TestCase):
   def setUp(self):
     self.sweep = tm.createFakeSweepEnviron()
 
-  def executeCommand(self, command, command_type=None):
+  def executeCommand(self, command_str, command_type=None):
     """ Execute the command.
 
     The type of command is usually determined from the first word in the command.
@@ -24,10 +24,10 @@ class CommandTestCase(unittest.TestCase):
     of CMD_*, as defined in parser.py.
     """
     if not command_type:
-      command_type = command.split()[0]
+      command_type = command_str.split()[0]
     parser = command_bindings.getParser(command_type)
-    results = parser.parseString(command)
-    command = command_bindings.getCommandClass(command_type)(0, results)
+    results = parser.parseString(command_str)
+    command = command_bindings.getCommandClass(command_type)(0, command_str, results)
     return command(self.sweep)
 
 class BeginAndEndCommands(CommandTestCase):

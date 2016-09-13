@@ -7,6 +7,19 @@ class XenonError(Exception):
   def __init__(self, msg):
     super(XenonError, self).__init__(msg)
 
+# TODO: Get rid of this error.
+class XenonSyntaxError(XenonError):
+  def __init__(self, parser_err, lineno):
+    super(XenonSyntaxError, self).__init__("")
+    self.parser_err = parser_err
+
+  def __str__(self):
+    spaces =  ' ' * (self.parser_err.col - 1)
+    msg = "Invalid syntax\n"
+    msg += "  ", self.parser_err.line
+    msg += "   %s^" % spaces
+    msg += str(err)
+
 class SweepNotInitializedError(XenonError):
   def __init__(self, msg):
     super(SweepNotInitializedException, self).__init__(

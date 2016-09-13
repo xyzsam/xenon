@@ -23,8 +23,10 @@ class Command(XenonObj):
   """
   __metaclass__ = abc.ABCMeta
 
-  def __init__(self, line, parse_result):
+  def __init__(self, lineno, line, parse_result):
     # Line number in the Xenon file.
+    self.lineno = lineno
+    # Original raw command.
     self.line = line
     # Keep a copy of the original parsed result around.
     self.parse_result = parse_result
@@ -40,9 +42,9 @@ class Command(XenonObj):
     return str(parse_result)
 
 class SelectionCommand(Command):
-  def __init__(self, line, parse_result):
+  def __init__(self, lineno, line, parse_result):
     """ Constructs a selection argument given a set of parsed tokens. """
-    super(SelectionCommand, self).__init__(line, parse_result.selection)
+    super(SelectionCommand, self).__init__(lineno, line, parse_result.selection)
     self.tokens = list(parse_result.selection)
     # This is an object reference to some object in some environment. It will
     # be resolved later.
@@ -105,9 +107,9 @@ class SelectionCommand(Command):
     return self.select(env)
 
 class BeginCommand(Command):
-  def __init__(self, line, parse_result):
+  def __init__(self, lineno, line, parse_result):
     """ Begin command specifies sweep name and sweep type. """
-    super(BeginCommand, self).__init__(line, parse_result)
+    super(BeginCommand, self).__init__(lineno, line, parse_result)
     self.name = parse_result.sweep_name
     self.sweep_type = None  # TODO: Implement this later.
 
@@ -115,23 +117,23 @@ class BeginCommand(Command):
     sweep_obj.initializeSweep(self.name, self.sweep_type)
 
 class EndCommand(Command):
-  def __init__(self, line, parse_result):
+  def __init__(self, lineno, line, parse_result):
     """ End command contains no additional information. """
-    super(EndCommand, self).__init__(line, parse_result)
+    super(EndCommand, self).__init__(lineno, line, parse_result)
 
   def execute(self, sweep_obj):
     sweep_obj.endSweep()
 
 class SetCommand(Command):
-  def __init__(self, line, parse_result):
+  def __init__(self, lineno, line, parse_result):
     """ Construct a set command.
 
     A set command's value can be either a constant numeric value, a string, or
     an expression.
     """
-    super(SetCommand, self).__init__(line, parse_result)
+    super(SetCommand, self).__init__(lineno, line, parse_result)
     self.param = parse_result.param
-    self.selection = SelectionCommand(line, parse_result)
+    self.selection = SelectionCommand(lineno, line, parse_result)
     if len(parse_result.constant):
       self.value = float(parse_result.constant)
     elif len(parse_result.string):
@@ -172,8 +174,8 @@ class SetCommand(Command):
     self.setParam(sweep_obj)
 
 class UseCommand(Command):
-  def __init__(self, line, parse_result):
-    super(UseCommand, self).__init__(line, parse_result)
+  def __init__(self, lineno, line, parse_result):
+    super(UseCommand, self).__init__(lineno, line, parse_result)
     self.package_path = list(parse_result.package_path)
 
   def execute(self, sweep_obj):
@@ -193,22 +195,22 @@ class UseCommand(Command):
       raise xe.XenonImportError(self.package_path)
 
 class GenerateCommand(Command):
-  def __init__(self, line, parse_result):
-    super(GenerateCommand, self).__init__(line, parse_result)
+  def __init__(self, lineno, line, parse_result):
+    super(GenerateCommand, self).__init__(lineno, line, parse_result)
     self.target = parse_result.target
 
   def execute(self, sweep_obj):
     sweep_obj.addGenerateOutput(self.target)
 
 class SweepCommand(Command):
-  def __init__(self, line, parse_result):
-    super(SweepCommand, self).__init__(line, parse_result)
+  def __init__(self, lineno, line, parse_result):
+    super(SweepCommand, self).__init__(lineno, line, parse_result)
     self.sweep_start = int(parse_result.range.start)
     self.sweep_end = int(parse_result.range.end)
     self.step = int(parse_result.range.step.amount)
     self.step_type = parse_result.range.step.type
     self.sweep_param = parse_result.sweep_param
-    self.selection = SelectionCommand(line, parse_result)
+    self.selection = SelectionCommand(lineno, line, parse_result)
 
   def execute(self, sweep_obj):
     selected_objs = self.selection(sweep_obj)

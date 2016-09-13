@@ -67,7 +67,7 @@ set_value = Word(alphanums, alphanums + "/")
 def buildKeywords():
   global reserved
   for command in commands:
-    reserved[command] = CaselessKeyword(command).setResultsName("command")
+    reserved[command] = CaselessKeyword(command).setResultsName(command)
   for other in other_keywords:
     reserved[other] = CaselessKeyword(other).setResultsName(other)
   for literal in special_literals:
