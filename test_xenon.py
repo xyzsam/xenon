@@ -3,7 +3,7 @@ import sys
 
 from parsers import *
 from commands import *
-from datatypes import DesignSweep
+from datatypes import DesignSweep, EnvObj
 from xenon_file_parser import XenonFileParser
 
 def tryTest(parser, text):
@@ -15,8 +15,8 @@ def tryTest(parser, text):
     return None
 
 def tryAllTestCases(name, parser, testcases):
-  print "Testing %s" % name
-  print "===================="
+  print "  Testing %s" % name
+  print "  -------------------"
 
   success = True
   for testcase in testcases:
@@ -25,10 +25,10 @@ def tryAllTestCases(name, parser, testcases):
     is_expected = parse_success == testcase[1]
     success &= is_expected
     if not is_expected:
-      print "Failed testcase \"%s\": got %s, expected %s" % (testcase[0], result, testcase[1])
+      print "  Failed testcase \"%s\": got %s, expected %s" % (testcase[0], result, testcase[1])
 
   if success:
-    print "All tests passed!"
+    print "  All tests passed!"
   print ""
 
 def testBeginParser():
@@ -226,14 +226,78 @@ def testSimpleSetCommands():
   set_command(sweep)
   assert(sweep.output_dir == "path/to/output")
 
+def testSelectionBinding():
+  class FakeEnviron(object):
+    """ An object mimicking basic functions of an environment. """
+    def __init__(self):
+      pass
+    def __iter__(self):
+      for key in self.__dict__:
+        yield key
+
+  middle1 = FakeEnviron()
+  middle1.low0 = "a low value"
+  middle1.low1 = "another low value"
+  top1 = FakeEnviron()
+  top1.middle0 = "a middle value"
+  top1.middle1 = middle1
+  fake_environ = FakeEnviron()
+  fake_environ.top0 = "a top value"
+  fake_environ.top1 = top1
+
+  # fake_environ = EnvObj({
+  #     "top0": "a top value",
+  #     "top1": EnvObj({
+  #       "middle0": "a middle value",
+  #       "middle1": EnvObj({
+  #         "low0": "a low value",
+  #         "low1": "another low value"
+  #         })
+  #     })
+  # })
+  selection_parser = buildSelectionParser()
+  selection = ""
+  results = selection_parser.parseString(selection, parseAll=True).selection
+  command = SelectionCommand(0, results)
+  selected_objs = command(fake_environ)
+  assert(len(selected_objs) == 1)
+  assert(selected_objs[0] == fake_environ)
+
+  selection = "for *"
+  results = selection_parser.parseString(selection, parseAll=True).selection
+  command = SelectionCommand(0, results)
+  selected_objs = command(fake_environ)
+  assert(len(selected_objs) == 2)
+  assert(fake_environ.top0 in selected_objs)
+  assert(fake_environ.top1 in selected_objs)
+
+  selection = "for top1.*"
+  results = selection_parser.parseString(selection, parseAll=True).selection
+  command = SelectionCommand(0, results)
+  selected_objs = command(fake_environ)
+  assert(len(selected_objs) == 2)
+  assert(fake_environ.top1.middle0 in selected_objs)
+
+  selection = "for top1.middle0"
+  results = selection_parser.parseString(selection, parseAll=True).selection
+  command = SelectionCommand(0, results)
+  selected_objs = command(fake_environ)
+  assert(len(selected_objs) == 1)
+  assert(fake_environ.top1.middle0 in selected_objs)
+
 def runCommandTests():
+  print "Running COMMAND tests"
+  print "=====================\n"
   testBeginAndEndCommands()
-  testSimpleSetCommands()
   testUseCommand()
+  testSimpleSetCommands()
+  testSelectionBinding()
+
   print "All tests passed!"
 
-
 def runParsingTests():
+  print "Running PARSING tests"
+  print "=====================\n"
   testBeginParser()
   testEndParser()
   testGenerateParser()
@@ -250,7 +314,7 @@ def testParseFile(filename):
 
 def main():
   buildKeywords()
-  # runParsingTests()
+  runParsingTests()
   runCommandTests()
   # testParseFile("example.sweep")
 

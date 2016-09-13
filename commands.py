@@ -1,7 +1,9 @@
 import abc
 import importlib
 import pyparsing as pp
+
 import xenon_exceptions as xe
+from parsers import *
 from expressions import Expression
 
 class Command(object):
@@ -41,33 +43,44 @@ class SelectionCommand(Command):
     self.tokens = tokens
     # This is an object reference to some object in some environment. It will
     # be resolved later.
-    self.binding = None
+    self.selected_objs = None
 
-  def bind(self, env):
-    """ Bind this selection to an object in an environment.
+  def get_non_special_attr_values(self, obj):
+    return [getattr(obj, attr) for attr in dir(obj) if not attr.startswith("__")]
+
+  def select(self, env):
+    """ Return a list of objects in an environment selected by this selection.
 
     The environment is a dict-like object in that it must support the in and []
     operators, and it must return an object that does the same.
     """
-    if self.tokens == "" or self.tokens == "*":
+    if len(self.tokens) == 0:
       # If there was no selection defined, then the selection is implicitly the
       # entire environment.
       return [env]
 
-    current_view = None
-    for token in tokens:
-      if token == KW_STAR:
-        self.binding = current_view if current_view != None else env
-        return self.binding
-      if token in env:
-        current_view = env[token]
+    if self.tokens[0] == "*":
+      # If the selection was "*", then return all first level objects under the
+      # environment.
+      return self.get_non_special_attr_values(env)
 
-    # FIXME: Ensure that this returned object can be iterated over.
-    self.binding = current_view
-    return self.binding
+    current_view = env
+    for token in self.tokens:
+      if token == KW_STAR:
+        break
+      try:
+        current_view = getattr(current_view, token)
+      except AttributeError:
+        raise xe.XenonSelectionError(".".join(self.tokens))
+
+    if token == "*":
+      self.selected_objs = self.get_non_special_attr_values(current_view)
+    else:
+      self.selected_objs = [current_view]
+    return self.selected_objs
 
   def execute(self, env):
-    return self.bind(env)
+    return self.select(env)
 
 class BeginCommand(Command):
   def __init__(self, line, parse_result):
@@ -140,15 +153,21 @@ class UseCommand(Command):
   def __init__(self, line, parse_result):
     super(UseCommand, self).__init__(line, parse_result)
     self.package_path = list(parse_result.package_path)
-    self.package_path = ".".join(self.package_path)
 
   def execute(self, sweep_obj):
+    package_path_str = ".".join(self.package_path)
     try:
-      package = importlib.import_module(self.package_path)
-      for attr, val in package.__dict__.iteritems():
-        # Don't import builtins or metadata about the package (name, file, etc.).
-        if not attr.startswith("__"):
-          sweep_obj.__dict__[attr] = val
+      package = importlib.import_module(package_path_str)
+      path_terminator = "*"  # For now, import everything into global namespace.
+      # path_terminator = self.package_path[-1]
+      if path_terminator == "*":
+        # Import everything into the global namespace.
+        for attr, val in package.__dict__.iteritems():
+          # Don't import builtins or metadata about the package (name, file, etc.).
+          if not attr.startswith("__"):
+            sweep_obj.__dict__[attr] = val
+      else:
+        sweep_obj.__dict__[path_terminator] = package
     except ImportError as e:
       raise xe.XenonImportError(self.package_path)
 

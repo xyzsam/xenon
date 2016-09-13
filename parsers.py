@@ -82,13 +82,15 @@ def buildGenerateParser():
   return generate_parser
 
 def buildSelectionParser():
-  """ A selection is a statement of the following form:
+  """ A selection is an optional statement of the following form:
 
-  selection = "for" + ("*" | ((ident + ".") ...) ["*"])
+  selection = ["for" + ("*" | ((ident + ".") ...) ["*"])]
   """
-  selection = Group(keywords["for"] + (
-      Literal("*") | Group(delimitedList(ident, delim=".") + Optional(Literal (".*"))))
+  selection_path = (
+      Group(Literal("*")) | 
+      Group(delimitedList(ident, delim=".") + Optional(Literal(".").suppress() + Literal ("*")))
       ).setResultsName("selection")
+  selection = Optional(keywords["for"] + selection_path)
   return selection
 
 def buildExpressionParser():
@@ -117,7 +119,7 @@ def buildSetParser():
   set_parser = (
       keywords["set"] +
       ident.setResultsName("param") +
-      Optional(selection) +
+      selection +
       (constant | stringValue | expression)
   )
   return set_parser
@@ -154,7 +156,7 @@ def buildSweepParser():
   sweep_range = buildRangeParser()
   sweep_parser = (
       keywords["sweep"] + ident.setResultsName("sweep_param") +
-      Optional(selection) + sweep_range)
+      selection + sweep_range)
   return sweep_parser
 
 def buildUseParser():

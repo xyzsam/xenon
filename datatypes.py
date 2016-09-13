@@ -27,6 +27,10 @@ class DesignSweep(object):
     self.generate_outputs = set()
     self.done = False
 
+  def __iter__(self):
+    for key in self.__dict__:
+      yield key
+
   def initializeSweep(self, name, sweep_type):
     self.name = name
     self.sweep_type = sweep_type
