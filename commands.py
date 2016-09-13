@@ -35,18 +35,17 @@ class Command(object):
     return str(parse_result)
 
 class SelectionCommand(Command):
-  def __init__(self, line, tokens):
+  def __init__(self, line, parse_result):
     """ Constructs a selection argument given a set of parsed tokens. """
-    # Selections are formed as part of a ParseResults, so they don't have their
-    # own ParseResults object.
-    super(SelectionCommand, self).__init__(line, None)
-    self.tokens = tokens
+    super(SelectionCommand, self).__init__(line, parse_result.selection)
+    self.tokens = list(parse_result.selection)
     # This is an object reference to some object in some environment. It will
     # be resolved later.
     self.selected_objs = None
 
   def get_non_special_attr_values(self, obj):
-    return [getattr(obj, attr) for attr in dir(obj) if not attr.startswith("__")]
+    return [getattr(obj, attr) for attr in dir(obj)
+            if not attr.startswith("__") and not callable(getattr(obj, attr))]
 
   def select(self, env):
     """ Return a list of objects in an environment selected by this selection.
@@ -59,7 +58,7 @@ class SelectionCommand(Command):
       # entire environment.
       return [env]
 
-    if self.tokens[0] == "*":
+    if self.tokens[0] == KW_STAR:
       # If the selection was "*", then return all first level objects under the
       # environment.
       return self.get_non_special_attr_values(env)
@@ -73,7 +72,7 @@ class SelectionCommand(Command):
       except AttributeError:
         raise xe.XenonSelectionError(".".join(self.tokens))
 
-    if token == "*":
+    if token == KW_STAR:
       self.selected_objs = self.get_non_special_attr_values(current_view)
     else:
       self.selected_objs = [current_view]
@@ -109,9 +108,9 @@ class SetCommand(Command):
     """
     super(SetCommand, self).__init__(line, parse_result)
     self.param = parse_result.param
-    self.selection = SelectionCommand(line, parse_result.selection)
-    if len(parse_result.constant_value):
-      self.value = float(parse_result.constant_value)
+    self.selection = SelectionCommand(line, parse_result)
+    if len(parse_result.constant):
+      self.value = float(parse_result.constant)
     elif len(parse_result.string):
       self.value = parse_result.string
     else:
@@ -133,9 +132,9 @@ class SetCommand(Command):
     else:
       value = self.value
 
-    selected_objects = self.selection(sweep_obj)
+    selected_objs = self.selection(sweep_obj)
     is_applied_at_least_once = False
-    for obj in selected_objects:
+    for obj in selected_objs:
       try:
         obj.__setattr__(self.param, value)
         is_applied_at_least_once = True

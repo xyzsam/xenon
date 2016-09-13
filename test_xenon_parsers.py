@@ -1,9 +1,8 @@
 import pyparsing as pp
-import sys
 
 from parsers import *
 from commands import *
-from datatypes import DesignSweep, EnvObj
+from datatypes import DesignSweep
 from xenon_file_parser import XenonFileParser
 
 def tryTest(parser, text):
@@ -192,109 +191,6 @@ def closeSweep(sweep):
   end_command = EndCommand(0, results)
   end_command(sweep)
 
-def testBeginAndEndCommands():
-  sweep = getInitializedSweep("mysweep")
-  assert(sweep.name == "mysweep")
-  assert(sweep.sweep_type == None)
-
-  closeSweep(sweep)
-  assert(sweep.done == True)
-
-def testUseCommand():
-  sys.path.append("/group/vlsiarch/samxi/active_projects/gem5-stable/sweeps")
-  sweep = getInitializedSweep("mysweep")
-  use_parser = buildUseParser()
-  results = use_parser.parseString("use benchmark_configs.machsuite_config")
-  use_command = UseCommand(0, results)
-  use_command(sweep)
-
-  assert("aes_aes" in sweep.__dict__)
-  assert("md_knn" in sweep.__dict__)
-  assert("DMA" in sweep.__dict__)
-
-def testSimpleSetCommands():
-  """ Simple == no selections or expressions. """
-  sweep = getInitializedSweep("mysweep")
-  set_parser = buildSetParser()
-  results = set_parser.parseString("set output_dir \"path\"")
-  set_command = SetCommand(0, results)
-  set_command(sweep)
-  assert(sweep.output_dir == "path")
-
-  results = set_parser.parseString("set output_dir \"path/to/output\"")
-  set_command = SetCommand(0, results)
-  set_command(sweep)
-  assert(sweep.output_dir == "path/to/output")
-
-def testSelectionBinding():
-  class FakeEnviron(object):
-    """ An object mimicking basic functions of an environment. """
-    def __init__(self):
-      pass
-    def __iter__(self):
-      for key in self.__dict__:
-        yield key
-
-  middle1 = FakeEnviron()
-  middle1.low0 = "a low value"
-  middle1.low1 = "another low value"
-  top1 = FakeEnviron()
-  top1.middle0 = "a middle value"
-  top1.middle1 = middle1
-  fake_environ = FakeEnviron()
-  fake_environ.top0 = "a top value"
-  fake_environ.top1 = top1
-
-  # fake_environ = EnvObj({
-  #     "top0": "a top value",
-  #     "top1": EnvObj({
-  #       "middle0": "a middle value",
-  #       "middle1": EnvObj({
-  #         "low0": "a low value",
-  #         "low1": "another low value"
-  #         })
-  #     })
-  # })
-  selection_parser = buildSelectionParser()
-  selection = ""
-  results = selection_parser.parseString(selection, parseAll=True).selection
-  command = SelectionCommand(0, results)
-  selected_objs = command(fake_environ)
-  assert(len(selected_objs) == 1)
-  assert(selected_objs[0] == fake_environ)
-
-  selection = "for *"
-  results = selection_parser.parseString(selection, parseAll=True).selection
-  command = SelectionCommand(0, results)
-  selected_objs = command(fake_environ)
-  assert(len(selected_objs) == 2)
-  assert(fake_environ.top0 in selected_objs)
-  assert(fake_environ.top1 in selected_objs)
-
-  selection = "for top1.*"
-  results = selection_parser.parseString(selection, parseAll=True).selection
-  command = SelectionCommand(0, results)
-  selected_objs = command(fake_environ)
-  assert(len(selected_objs) == 2)
-  assert(fake_environ.top1.middle0 in selected_objs)
-
-  selection = "for top1.middle0"
-  results = selection_parser.parseString(selection, parseAll=True).selection
-  command = SelectionCommand(0, results)
-  selected_objs = command(fake_environ)
-  assert(len(selected_objs) == 1)
-  assert(fake_environ.top1.middle0 in selected_objs)
-
-def runCommandTests():
-  print "Running COMMAND tests"
-  print "=====================\n"
-  testBeginAndEndCommands()
-  testUseCommand()
-  testSimpleSetCommands()
-  testSelectionBinding()
-
-  print "All tests passed!"
-
 def runParsingTests():
   print "Running PARSING tests"
   print "=====================\n"
@@ -315,8 +211,7 @@ def testParseFile(filename):
 def main():
   buildKeywords()
   runParsingTests()
-  runCommandTests()
-  # testParseFile("example.sweep")
+  testParseFile("example.sweep")
 
 if __name__ == "__main__":
   main()

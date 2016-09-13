@@ -11,6 +11,7 @@ BINDINGS_ = {
   CMD_SET:      Binding(parserBuilder=buildSetParser, commandClass=SetCommand),
   CMD_GENERATE: Binding(parserBuilder=buildGenerateParser, commandClass=GenerateCommand),
   CMD_USE:      Binding(parserBuilder=buildUseParser, commandClass=UseCommand),
+  KW_FOR:       Binding(parserBuilder=buildSelectionParser, commandClass=SelectionCommand),
 }
 
 # Rather than building the parser every time it is required, build them once

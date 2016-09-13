@@ -19,17 +19,19 @@ from xenon_exceptions import *
 #     return
 #
 
-# TODO: Needs to implement __contains__, __getitem__, and __setitem__
 class DesignSweep(object):
-  def __init__(self):
-    self.name = None
-    self.sweep_type = None  # TODO Support different sweep types.
+  def __init__(self, name=None, sweep_type=None):
+    self.name = name
+    self.sweep_type = sweep_type  # TODO Support different sweep types.
     self.generate_outputs = set()
     self.done = False
 
   def __iter__(self):
     for key in self.__dict__:
       yield key
+
+  def __setattr__(self, name, value):
+    self.__dict__[name] = value
 
   def initializeSweep(self, name, sweep_type):
     self.name = name
@@ -46,3 +48,9 @@ class DesignSweep(object):
   def checkInitializedAndRaise_(self):
     if self.name == None:
       raise SweepNotInitializedError()
+
+  def __repr__(self):
+    return "DesignSweep({0},{1})".format(self.name, self.sweep_type)
+
+  def __str__(self):
+    return self.__repr__()
