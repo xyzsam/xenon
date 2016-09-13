@@ -1,12 +1,8 @@
 # Definitions of sweep parameters.
+from base_datatypes import *
 
-class BaseParam(object):
-  def __init__(self, name, param_type):
-    self.name = name
-    self.param_type = param_type
-
-cycle_time = "CYCLE_TIME"
-unrolling = "UNROLLING"
-partition_factor = "PARTITION_FACTOR"
-partition_type = "PARTITION_TYPE"
-pipelining = "PIPELINING"
+cycle_time = Param("cycle_time", 1)
+unrolling = Param("unrolling", 1)
+partition_factor = Param("partition_factor", 1)
+partition_type = Param("partition_type", "cyclic")
+pipelining = Param("pipelining", False)

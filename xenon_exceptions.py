@@ -1,3 +1,8 @@
+# Error codes.
+SUCCESS = 0
+INVALID_SWEEP_PARAMETER = 1
+
+# Exception classes.
 class XenonError(Exception):
   def __init__(self, msg):
     super(XenonError, self).__init__(msg)
@@ -17,18 +22,21 @@ class XenonSelectionError(XenonError):
     super(XenonSelectionError, self).__init__(
         "Failed to find object named %s" % selection_path)
 
+class XenonInvalidStepAmountError(XenonError):
+  def __init__(self, name, step, step_type):
+    super(XenonInvalidStepAmountError, self).__init__(
+        "Sweep range %s with step type %s cannot have step amount %d" % (name, step_type, step))
+
 class XenonInvalidStepTypeError(XenonError):
   def __init__(self, param_name, step_type):
     super(XenonInvalidStepTypeError, self).__init__(
         "Parameter %s has invalid step type %s" % (param_name, step_type))
 
-# TODO: Consider removing this exception class.
-class XenonInvalidSweepParameterError(XenonError):
-  def __init__(self, parameter, instance):
-    super(XenonInvalidSweepParameterError, self).__init__(
-        "Parameter %s cannot be swept on object of type %s" % (
-            parameter, type(instance).__name__))
-
 class NotXenonObjError(XenonError):
   def __init__(self, obj):
     super(NotXenonObjError, self).__init__("%s is not of type XenonObj.")
+
+class XenonAttributeError(XenonError):
+  def __init__(self, attr):
+    super(XenonAttributeError, self).__init__(
+        "No objects with sweepable attribute %s were found." % attr)
