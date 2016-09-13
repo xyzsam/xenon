@@ -12,25 +12,35 @@ import command_bindings
 def createFakeSweepEnviron(sweep):
   # Builds the following class attribute structure:
   # self.sweep = {
+  #     "common": None,
   #     "top0": "a top value",
   #     "top1": {
   #       "middle0": "a middle value",
   #       "middle1": {
   #         "low0": "a low value",
-  #         "low1": "another low value"
+  #         "low1": "another low value",
+  #         "common": None,
+  #         }
+  #       "middle2": {
+  #         "low0": "a second low value",
+  #         "low1": "another second low value",
+  #         "common": None,
   #         }
   #     }
   # }
   middle1 = DesignSweep("middle1")
   middle1.low0 = "a low value"
   middle1.low1 = "another low value"
+  middle1.common = None
   middle2 = DesignSweep("middle2")
   middle2.low0 = "a second low value"
   middle2.low1 = "another second low value"
+  middle2.common = None
   top1 = DesignSweep("top1")
   top1.middle0 = "a middle value"
   top1.middle1 = middle1
   top1.middle2 = middle2
+  top1.common = None
   sweep.top0 = "a top value"
   sweep.top1 = top1
 
@@ -83,31 +93,33 @@ class SetCommand(CommandTestCase):
     self.assertEqual(self.sweep.output_dir, "path/to/output")
 
   def test_set_with_selections(self):
-    self.executeCommand("set testattr0 for * 3")
-    self.assertEqual(self.sweep.top1.testattr0, 3)
-    self.assertFalse(hasattr(self.sweep.top1.middle1, "testattr0"))
+    self.executeCommand("set common for * 3")
+    self.assertEqual(self.sweep.top1.common, 3)
+    self.assertEqual(self.sweep.top1.middle1.common, None)
 
-    self.executeCommand("set teststring for * \"astring\"")
-    self.assertEqual(self.sweep.top1.teststring, "astring")
-    self.assertFalse(hasattr(self.sweep.top1.middle1, "teststring"))
+    self.executeCommand("set common for * \"astring\"")
+    self.assertEqual(self.sweep.top1.common, "astring")
+    self.assertEqual(self.sweep.top1.middle1.common, None)
 
-    self.executeCommand("set testattr1 for top1 4")
-    self.assertEqual(self.sweep.top1.testattr1, 4)
-    self.assertFalse(hasattr(self.sweep.top1.middle1, "testattr1"))
+    self.executeCommand("set common for top1 4")
+    self.assertEqual(self.sweep.top1.common, 4)
+    self.assertEqual(self.sweep.top1.middle1.common, None)
 
   def test_set_with_nested_selections(self):
-    self.executeCommand("set testattr0 for top1.middle1 3")
-    self.assertEqual(self.sweep.top1.middle1.testattr0, 3)
-    self.assertFalse(hasattr(self.sweep.top1, "testattr0"))
-    self.assertFalse(hasattr(self.sweep.top1.middle2, "testattr0"))
+    self.executeCommand("set common for top1.middle1 3")
+    self.assertEqual(self.sweep.top1.middle1.common, 3)
+    self.assertEqual(self.sweep.top1.middle2.common, None)
+    self.assertEqual(self.sweep.top1.common, None)
 
-    self.executeCommand("set testattr1 for top1.* 4")
-    self.assertEqual(self.sweep.top1.middle1.testattr1, 4)
-    self.assertEqual(self.sweep.top1.middle2.testattr1, 4)
+    self.executeCommand("set common for top1.* 4")
+    self.assertEqual(self.sweep.top1.middle1.common, 4)
+    self.assertEqual(self.sweep.top1.middle2.common, 4)
+    self.assertEqual(self.sweep.top1.common, None)
 
-    self.executeCommand("set teststring for top1.* \"mystring\"")
-    self.assertEqual(self.sweep.top1.middle1.teststring, "mystring")
-    self.assertEqual(self.sweep.top1.middle2.teststring, "mystring")
+    self.executeCommand("set common for top1.* \"mystring\"")
+    self.assertEqual(self.sweep.top1.middle1.common, "mystring")
+    self.assertEqual(self.sweep.top1.middle2.common, "mystring")
+    self.assertEqual(self.sweep.top1.common, None)
 
 class SelectionCommand(CommandTestCase):
   def setUp(self):

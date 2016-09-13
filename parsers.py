@@ -87,7 +87,7 @@ def buildSelectionParser():
   selection = ["for" + ("*" | ((ident + ".") ...) ["*"])]
   """
   selection_path = (
-      Group(Literal("*")) | 
+      Group(Literal("*")) |
       Group(delimitedList(ident, delim=".") + Optional(Literal(".").suppress() + Literal ("*")))
       ).setResultsName("selection")
   selection = Optional(keywords["for"] + selection_path)

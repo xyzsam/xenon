@@ -11,7 +11,7 @@ class Command(object):
 
   Subclasses must implement the execute method, which can take an arbitrary
   number of arguments. Generally, all that is required is a DesignSweep object, as
-  it (should) encapsulates all the state needed.
+  it should encapsulate all the state needed.
 
   Commands can be invoked using operator() like command(sweep_obj), for
   brevity. This is equivalent to calling execute().
@@ -173,9 +173,19 @@ class UseCommand(Command):
 class GenerateCommand(Command):
   def __init__(self, line, parse_result):
     super(GenerateCommand, self).__init__(line, parse_result)
+    self.target = parse_result.target
+
+  def execute(self, sweep_obj):
+    sweep_obj.addGenerateOutput(self.target)
 
 class SweepCommand(Command):
   def __init__(self, line, arg, sweep_range, selection=None):
     super(SweepCommand, self).__init__(line, parse_result)
-    self.sweep_range = SweepRange(sweep_range)
-    self.selection = SelectionCommand(line, selection)
+    self.sweep_start = parse_result.start
+    self.sweep_end = parse_result.end
+    self.step_type = parse_result.step_type
+    self.sweep_param = parse_result.sweep_param
+    self.selection = SelectionCommand(line, parse_result.selection)
+
+  def execute(self, sweep_obj):
+    pass

@@ -25,13 +25,14 @@ class DesignSweep(object):
     self.sweep_type = sweep_type  # TODO Support different sweep types.
     self.generate_outputs = set()
     self.done = False
+    self.output_dir = ""
+    self.source_dir = ""
+    self.memory_type = ""
+    self.simulator = ""
 
   def __iter__(self):
     for key in self.__dict__:
       yield key
-
-  def __setattr__(self, name, value):
-    self.__dict__[name] = value
 
   def initializeSweep(self, name, sweep_type):
     self.name = name
@@ -51,6 +52,3 @@ class DesignSweep(object):
 
   def __repr__(self):
     return "DesignSweep({0},{1})".format(self.name, self.sweep_type)
-
-  def __str__(self):
-    return self.__repr__()
