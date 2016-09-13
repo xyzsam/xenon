@@ -185,8 +185,7 @@ class UseCommand(Command):
       if path_terminator == "*":
         # Import everything into the global namespace.
         for attr, val in package.__dict__.iteritems():
-          # Don't import builtins or metadata about the package (name, file, etc.).
-          if not attr.startswith("__"):
+          if isinstance(val, XenonObj):
             sweep_obj.__dict__[attr] = val
       else:
         sweep_obj.__dict__[path_terminator] = package

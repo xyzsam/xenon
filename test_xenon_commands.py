@@ -1,7 +1,6 @@
 # A suite of unit tests for command execution.
 
 import pyparsing as pp
-import sys
 import unittest
 
 from params import Param
@@ -11,48 +10,11 @@ from base_datatypes import DesignSweep
 from datatypes import Benchmark, Sweepable
 import command_bindings
 
-fake_param = Param("sweep_param", 0)
-class FakeDesignSweep(DesignSweep):
-  sweepable_params = DesignSweep.sweepable_params + [fake_param]
-  def __init__(self, name):
-    super(FakeDesignSweep, self).__init__(name)
-
-def createFakeSweepEnviron(sweep):
-  # Builds the following class attribute structure:
-  # self.sweep = {
-  #     "sweep_param": 0,
-  #     "top0": "a top value",
-  #     "top1": {
-  #       "sweep_param": 0,
-  #       "middle0": "a middle value",
-  #       "middle1": {
-  #         "low0": "a low value",
-  #         "low1": "another low value",
-  #         "sweep_param": 0,
-  #         }
-  #       "middle2": {
-  #         "low0": "a second low value",
-  #         "low1": "another second low value",
-  #         "sweep_param": 0,
-  #         }
-  #     }
-  # }
-  middle1 = FakeDesignSweep("middle1")
-  middle1.low0 = "a low value"
-  middle1.low1 = "another low value"
-  middle2 = FakeDesignSweep("middle2")
-  middle2.low0 = "a second low value"
-  middle2.low1 = "another second low value"
-  top1 = FakeDesignSweep("top1")
-  top1.middle0 = "a middle value"
-  top1.middle1 = middle1
-  top1.middle2 = middle2
-  sweep.top0 = "a top value"
-  sweep.top1 = top1
+import test_module as tm
 
 class CommandTestCase(unittest.TestCase):
   def setUp(self):
-    self.sweep = FakeDesignSweep("mysweep")
+    self.sweep = tm.createFakeSweepEnviron()
 
   def executeCommand(self, command, command_type=None):
     """ Execute the command.
@@ -79,16 +41,12 @@ class BeginAndEndCommands(CommandTestCase):
 
 class UseCommand(CommandTestCase):
   def runTest(self):
-    sys.path.append("/group/vlsiarch/samxi/active_projects/gem5-stable/sweeps")
-    self.executeCommand("use benchmark_configs.machsuite_config")
-    self.assertIn("aes_aes", self.sweep.__dict__)
-    self.assertIn("md_knn",self.sweep.__dict__)
-    self.assertIn("DMA", self.sweep.__dict__)
+    self.executeCommand("use test_module")
+    self.assertIn("USE_COMMAND_SWEEP_TEST_OBJ", self.sweep.__dict__)
 
 class SelectionCommand(CommandTestCase):
   def setUp(self):
     super(SelectionCommand, self).setUp()
-    createFakeSweepEnviron(self.sweep)
 
   def test_non_recursive(self):
     selected_objs = self.executeCommand("", command_type=KW_FOR)
@@ -125,7 +83,6 @@ class SelectionCommand(CommandTestCase):
 class SetCommand(CommandTestCase):
   def setUp(self):
     super(SetCommand, self).setUp()
-    createFakeSweepEnviron(self.sweep)
 
   def test_simple(self):
     """ Simple == no selections or expressions. """
@@ -180,7 +137,6 @@ class SetCommand(CommandTestCase):
 class SweepCommand(CommandTestCase):
   def setUp(self):
     super(SweepCommand, self).setUp()
-    createFakeSweepEnviron(self.sweep)
 
   def test_global_sweep(self):
     self.executeCommand("sweep sweep_param from 1 to 8 linstep 2")
