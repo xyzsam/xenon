@@ -1,7 +1,6 @@
 import math
 
 import xenon_exceptions as xe
-import params
 
 class XenonObj(object):
   """ Base class for any object defined by the Xenon system. """
