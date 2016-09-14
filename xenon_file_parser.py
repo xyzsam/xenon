@@ -30,7 +30,6 @@ class XenonFileParser(object):
     with open(self.filename) as f:
       for line_number, line in enumerate(f):
         line_number += 1  # Line numbers aren't zero indexed.
-        line = line.lower()
         line = line.strip()
         if not line:
           continue

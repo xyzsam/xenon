@@ -52,4 +52,4 @@ class NotXenonObjError(XenonError):
 class XenonAttributeError(XenonError):
   def __init__(self, attr):
     super(XenonAttributeError, self).__init__(
-        "No objects with sweepable attribute %s were found." % attr)
+        "No objects with sweepable attribute \"%s\" were found." % attr)

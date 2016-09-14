@@ -27,13 +27,16 @@ class XenonInterpreter(object):
       except xe.XenonError as e:
         self.handleXenonError(command, e)
 
+    return current_sweep
+
 def main():
   parser = argparse.ArgumentParser()
   parser.add_argument("xenon_file", help="Xenon input file.")
   args = parser.parse_args()
 
   interpreter = XenonInterpreter(args.xenon_file)
-  interpreter.execute()
+  sweep = interpreter.execute()
+  sweep.dump()
 
 if __name__ == "__main__":
   main()

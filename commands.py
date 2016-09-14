@@ -2,14 +2,10 @@ import abc
 import importlib
 import pyparsing as pp
 
-import xenon_exceptions as xe
-from parsers import *
-from expressions import Expression
 from base_datatypes import XenonObj, Sweepable
-
-def get_non_special_attr_values(obj, objtype=object):
-  return [getattr(obj, attr) for attr in dir(obj)
-          if not attr.startswith("__") and isinstance(getattr(obj, attr), objtype)]
+from expressions import Expression
+from parsers import *
+import xenon_exceptions as xe
 
 class Command(XenonObj):
   """ Commands describe an action to perform on a sweep.
@@ -53,7 +49,7 @@ class SelectionCommand(Command):
   def selectRecursive(self, root):
     """ Recursively selects all attributes of type XenonObj from root. """
     selected_objs = []
-    for obj in get_non_special_attr_values(root, objtype=XenonObj):
+    for obj in root.iterattrvalues(objtype=XenonObj):
       # Safety check to avoid infinite recursion.
       if obj == root:
         continue
@@ -71,15 +67,14 @@ class SelectionCommand(Command):
       # TODO: TypeError instead?
       raise xe.NotXenonObjError(env)
 
+    # TODO: Consider making this equal to ** - then users can use the sweep and
+    # set commands without a selection and get the behavior of it affecting
+    # everything.
     if len(self.tokens) == 0:
+      self.tokens.append(LIT_STARSTAR)
       # If there was no selection defined, then the selection is implicitly the
       # entire environment.
-      return [env]
-
-    # if self.tokens[0] == LIT_STAR:
-    #   # If the selection was "*", then return all first level objects under the
-    #   # environment.
-    #   return get_non_special_attr_values(env, objtype=XenonObj)
+      # return [env]
 
     current_view = env
     for i, token in enumerate(self.tokens):
@@ -93,7 +88,7 @@ class SelectionCommand(Command):
         raise xe.NotXenonObjError(".".join(self.tokens[:i+1]))
 
     if token == LIT_STAR:
-      self.selected_objs = get_non_special_attr_values(current_view, objtype=XenonObj)
+      self.selected_objs = current_view.iterattrvalues(objtype=XenonObj)
     elif token == LIT_STARSTAR:
       self.selected_objs = self.selectRecursive(current_view)
       # Remember: ** returns not just all the children of the current view, but
@@ -160,15 +155,12 @@ class SetCommand(Command):
     selected_objs = self.selection(sweep_obj)
     is_applied = False
     for obj in selected_objs:
-      try:
+      if hasattr(obj, self.param):
         setattr(obj, self.param, value)
         is_applied = True
-      except AttributeError as e:
-        continue
 
     if not is_applied:
-      print ("Warning: did not find any objects in the provided sweep for which "
-             "the parameter {0} could be set to {1}".format(self.param, self.value))
+      raise xe.XenonAttributeError(self.param)
 
   def execute(self, sweep_obj):
     self.setParam(sweep_obj)
