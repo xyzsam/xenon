@@ -34,8 +34,8 @@ class Command(XenonObj):
   def __call__(self, *args):
     return self.execute(*args)
 
-  def __str__(self):
-    return str(parse_result)
+  def __repr__(self):
+    return self.line
 
 class SelectionCommand(Command):
   def __init__(self, lineno, line, parse_result):

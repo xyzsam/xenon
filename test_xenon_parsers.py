@@ -184,5 +184,28 @@ class UseParser(Common.ParserTestCase):
                       ("use package.something.*", False),
                       ]
 
+class CommentParser(Common.ParserTestCase):
+  """ This test ensures we can distinguish comments and commands. """
+  def setUp(self):
+    self.parser = buildCommandParser()
+    self.testcases = []
+
+  def test_inline_comments(self):
+    results = self.parser.parseString("set param 3   #   This is a comment.", parseAll=True)
+    self.assertEqual(str(results.command), "set")
+    self.assertEqual(' '.join(results.rest[0]), "param 3")
+    self.assertEqual(results.comment, "#   This is a comment.")
+
+    results = self.parser.parseString("use package.module # comment.", parseAll=True)
+    self.assertEqual(str(results.command), "use")
+    self.assertEqual(' '.join(results.rest[0]), "package.module")
+    self.assertEqual(results.comment, "# comment.")
+
+  def test_whole_line_comment(self):
+    results = self.parser.parseString("# This is a comment only.", parseAll=True)
+    self.assertEqual(str(results.command), "")
+    self.assertEqual(len(results.rest), 0)
+    self.assertEqual(str(results.comment), "# This is a comment only.")
+
 if __name__ == "__main__":
   unittest.main()
