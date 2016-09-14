@@ -24,6 +24,10 @@ class XenonInterpreter(object):
     # The result of the execution.
     self.configured_sweep = None
 
+  def handleXenonError(self, command, e):
+    msg = "On line %d: %s\n" % (command.lineno, command.line)
+    msg += "%s: %s" % (e.__class__.__name__, str(e))
+
   def handleSyntaxError(self, parser_err, line_number):
     spaces =  ' ' * (parser_err.col - 1)
     msg = "Invalid syntax on line %s:\n" % line_number
@@ -54,7 +58,6 @@ class XenonInterpreter(object):
         try:
           # Reform the line without the comments.
           line = result.command + ' ' + ' '.join(result.rest[0])
-          print line
           result = getParser(result.command).parseString(line, parseAll=True)
         except pp.ParseException as x:
           self.handleSyntaxError(x, line_number)
@@ -65,6 +68,7 @@ class XenonInterpreter(object):
   def execute(self):
     current_sweep = DesignSweep()
     for command in self.commands_:
+      print command.line
       try:
         command(current_sweep)
       except xe.XenonError as e:

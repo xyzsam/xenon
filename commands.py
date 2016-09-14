@@ -7,6 +7,18 @@ from expressions import Expression
 from parsers import *
 import xenon_exceptions as xe
 
+def recursiveSelect(root, objtype=object):
+  """ Recursively selects all attributes of type XenonObj from root. """
+  assert(isinstance(root, objtype))
+  selected_objs = []
+  for obj in root.iterattrvalues(objtype=objtype):
+    # Safety check to avoid infinite recursion.
+    if obj == root:
+      continue
+    selected_objs.append(obj)
+    selected_objs.extend(recursiveSelect(obj, objtype=objtype))
+  return selected_objs
+
 class Command(XenonObj):
   """ Commands describe an action to perform on a sweep.
 
@@ -46,17 +58,6 @@ class SelectionCommand(Command):
     # be resolved later.
     self.selected_objs = None
 
-  def selectRecursive(self, root):
-    """ Recursively selects all attributes of type XenonObj from root. """
-    selected_objs = []
-    for obj in root.iterattrvalues(objtype=XenonObj):
-      # Safety check to avoid infinite recursion.
-      if obj == root:
-        continue
-      selected_objs.append(obj)
-      selected_objs.extend(self.selectRecursive(obj))
-    return selected_objs
-
   def select(self, env):
     """ Return a list of objects in an environment selected by this selection.
 
@@ -88,9 +89,9 @@ class SelectionCommand(Command):
         raise xe.NotXenonObjError(".".join(self.tokens[:i+1]))
 
     if token == LIT_STAR:
-      self.selected_objs = current_view.iterattrvalues(objtype=XenonObj)
+      self.selected_objs = [v for v in current_view.iterattrvalues(objtype=XenonObj)]
     elif token == LIT_STARSTAR:
-      self.selected_objs = self.selectRecursive(current_view)
+      self.selected_objs = recursiveSelect(current_view, objtype=XenonObj)
       # Remember: ** returns not just all the children of the current view, but
       # the current view itself.
       self.selected_objs.extend([current_view])

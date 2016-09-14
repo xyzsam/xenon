@@ -1,12 +1,14 @@
 import math
 import pprint
+import uuid
 
 import xenon_exceptions as xe
 
 class XenonObj(object):
   """ Base class for any object defined by the Xenon system. """
   def __init__(self):
-    pass
+    # Unique identifier for all Xenon objects.
+    self.id = uuid.uuid1().int
 
   def iterattrkeys(self, objtype=object):
     """ Analogue of dict.iterkeys() over attributes, with filtering. """
@@ -28,17 +30,24 @@ class XenonObj(object):
     """ Returns true if the attribute is not a builtin and optionally is of the given type. """
     return not attr.startswith("__") and isinstance(getattr(self, attr), objtype)
 
-
 class Param(XenonObj):
+  """ An attribute that can be set via a Xenon set command.
+
+  Parameters are described by a name, default value, and an automatically
+  generated unique identifer. They are distinguished by id. Changing the
+  id field of a parameter lets it be identified as a distinct attribute regardless
+  of its name, so it can be swept independently.
+  """
   def __init__(self, name, default):
-    # Name of the attribute to set in an XenonObj.
+    super(Param, self).__init__()
     self.name = name
     self.default = default
 
   def __eq__(self, other):
     if type(self) == type(other):
-      return self.name == other.name
+      return self.id == other.id
     elif isinstance(other, str):
+      # This is used by the Sweepable.setSweepParameter function.
       return self.name == other
     return False
 
@@ -53,12 +62,15 @@ class Sweepable(XenonObj):
   # A list of sweepable parameters for this class.
   sweepable_params = []
 
+  # Automatically generated mapping from Param name to id.
+  sweepable_params_dict_ = {}
+
   def __init__(self, name):
     self.name = name
     # The command `sweep param from x to y linstep z` will check if `param` is
     # an entry of sweepable_params for this class. If so, it add an entry to
-    # this dict, mapping name to the specified range (which is immediately
-    # expanded into a Python list).
+    # this dict, mapping the parameter id to the specified range (which is
+    # immediately expanded into a Python list).
     self.sweep_params_range = {}
     self.createSweepAttributes()
 
@@ -70,6 +82,18 @@ class Sweepable(XenonObj):
       # object's parents from values that were specifically set on this object
       # by the user.
       setattr(self, param.name, None)
+      self.__class__.sweepable_params_dict_[param.name] = param.id
+
+  def getParamId(self, name):
+    return self.__class__.sweepable_params_dict_[name]
+
+  def hasSweepParamRange(self, name):
+    param_id = self.getParamId(name)
+    return param_id in self.sweep_params_range
+
+  def getSweepParamRange(self, name):
+    param_id = self.getParamId(name)
+    return self.sweep_params_range[param_id]
 
   def setSweepParameter(self, name, start, end, step, step_type):
     """ Sets the named sweep parameter with the given range.
@@ -82,36 +106,43 @@ class Sweepable(XenonObj):
       XenonInvalidStepTypeError: if step_type is not recognized
       XenonInvalidStepAmountError: if the step amount would produce an invalid range.
     """
-    if not name in self.__class__.sweepable_params:
-      return xe.INVALID_SWEEP_PARAMETER
     if (step_type != "linstep" and step_type != "expstep"):
       raise xe.XenonInvalidStepTypeError(name, step_type)
     if (step_type == "linstep" and step == 0) or (step_type == "expstep" and step == 1):
       raise xe.XenonInvalidStepAmountError(name, step, step_type)
+    if not name in self.__class__.sweepable_params_dict_:
+      return xe.INVALID_SWEEP_PARAMETER
 
+    param_id = self.getParamId(name)
     value_range = []
     if step_type == "linstep":
       value_range = range(start, end+1, step)
     elif step_type == "expstep":
       value_range = [start * (step ** exp)
                      for exp in range(0, int(math.log(end/start, step))+1)]
-    self.sweep_params_range[name] = value_range
+    self.sweep_params_range[param_id] = value_range
     return xe.SUCCESS
 
   def dump(self):
-    """ Dumps all sweepable parameters in a readable format. """
+    """ Dumps all sweepable parameters in a readable format.
+
+    This is only meant for debugging purposes.
+    """
     dictified = self.dictify()
     printer = pprint.PrettyPrinter(indent=4)
     printer.pprint(dictified)
 
   def dictify(self):
     """ Generate a dict representation of this object.
-    
+
     This representation only includes sweepable parameters and objects.
     """
-    # First, generate the sweepable params
+    # First, generate the sweepable params and their values.
     key = str(self)
-    output = dict((p.name, getattr(self, p.name)) for p in self.__class__.sweepable_params)
+    set_params = dict((p.name, getattr(self, p.name)) for p in self.__class__.sweepable_params)
+    set_params.update(self.sweep_params_range)
+    output = set_params
+
     # Now, repeat for each Sweepable attribute.
     attrs = self.iterattrkeys(objtype=Sweepable)
     for attr in attrs:
@@ -119,9 +150,7 @@ class Sweepable(XenonObj):
     return output
 
   def __repr__(self):
-    return "{0}(\"{1}\")".format(self.__class__.__name__, self.name)
-
-
+    return "{0}(name=\"{1}\",id={2})".format(self.__class__.__name__, self.name, self.id)
 
 class DesignSweep(Sweepable):
   sweepable_params = Sweepable.sweepable_params + []

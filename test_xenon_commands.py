@@ -50,8 +50,11 @@ class SelectionCommand(CommandTestCase):
 
   def test_non_recursive(self):
     selected_objs = self.executeCommand("", command_type=KW_FOR)
-    self.assertEqual(len(selected_objs), 1)
-    self.assertEqual(selected_objs[0], self.sweep)
+    self.assertEqual(len(selected_objs), 4)
+    self.assertIn(self.sweep, selected_objs)
+    self.assertIn(self.sweep.top1, selected_objs)
+    self.assertIn(self.sweep.top1.middle1, selected_objs)
+    self.assertIn(self.sweep.top1.middle2, selected_objs)
 
     selected_objs = self.executeCommand("for *", command_type=KW_FOR)
     self.assertEqual(len(selected_objs), 1)
@@ -94,34 +97,34 @@ class SetCommand(CommandTestCase):
 
   def test_set_with_selections(self):
     self.executeCommand("set sweep_param for * 3")
-    self.assertEqual(self.sweep.sweep_param, 0)
+    self.assertEqual(self.sweep.sweep_param, None)
     self.assertEqual(self.sweep.top1.sweep_param, 3)
-    self.assertEqual(self.sweep.top1.middle1.sweep_param, 0)
+    self.assertEqual(self.sweep.top1.middle1.sweep_param, None)
 
     self.executeCommand("set sweep_param for * \"astring\"")
-    self.assertEqual(self.sweep.sweep_param, 0)
+    self.assertEqual(self.sweep.sweep_param, None)
     self.assertEqual(self.sweep.top1.sweep_param, "astring")
-    self.assertEqual(self.sweep.top1.middle1.sweep_param, 0)
+    self.assertEqual(self.sweep.top1.middle1.sweep_param, None)
 
     self.executeCommand("set sweep_param for top1 4")
     self.assertEqual(self.sweep.top1.sweep_param, 4)
-    self.assertEqual(self.sweep.top1.middle1.sweep_param, 0)
+    self.assertEqual(self.sweep.top1.middle1.sweep_param, None)
 
   def test_set_with_nested_selections(self):
     self.executeCommand("set sweep_param for top1.middle1 3")
     self.assertEqual(self.sweep.top1.middle1.sweep_param, 3)
-    self.assertEqual(self.sweep.top1.middle2.sweep_param, 0)
-    self.assertEqual(self.sweep.top1.sweep_param, 0)
+    self.assertEqual(self.sweep.top1.middle2.sweep_param, None)
+    self.assertEqual(self.sweep.top1.sweep_param, None)
 
     self.executeCommand("set sweep_param for top1.* 4")
     self.assertEqual(self.sweep.top1.middle1.sweep_param, 4)
     self.assertEqual(self.sweep.top1.middle2.sweep_param, 4)
-    self.assertEqual(self.sweep.top1.sweep_param, 0)
+    self.assertEqual(self.sweep.top1.sweep_param, None)
 
     self.executeCommand("set sweep_param for top1.* \"mystring\"")
     self.assertEqual(self.sweep.top1.middle1.sweep_param, "mystring")
     self.assertEqual(self.sweep.top1.middle2.sweep_param, "mystring")
-    self.assertEqual(self.sweep.top1.sweep_param, 0)
+    self.assertEqual(self.sweep.top1.sweep_param, None)
 
   def test_set_with_recursive_selections(self):
     self.executeCommand("set sweep_param for ** 4")
@@ -140,47 +143,52 @@ class SweepCommand(CommandTestCase):
 
   def test_global_sweep(self):
     self.executeCommand("sweep sweep_param from 1 to 8 linstep 2")
-    self.assertIn("sweep_param", self.sweep.sweep_params_range)
-    self.assertNotIn("sweep_param", self.sweep.top1.sweep_params_range)
-    self.assertEqual(self.sweep.sweep_params_range["sweep_param"], [1,3,5,7])
+    self.assertTrue(self.sweep.hasSweepParamRange("sweep_param"))
+    self.assertTrue(self.sweep.top1.hasSweepParamRange("sweep_param"))
+    self.assertTrue(self.sweep.top1.middle1.hasSweepParamRange("sweep_param"))
+    self.assertTrue(self.sweep.top1.middle2.hasSweepParamRange("sweep_param"))
+    self.assertEqual(self.sweep.getSweepParamRange("sweep_param"), [1,3,5,7])
+    self.assertEqual(self.sweep.top1.getSweepParamRange("sweep_param"), [1,3,5,7])
+    self.assertEqual(self.sweep.top1.middle1.getSweepParamRange("sweep_param"), [1,3,5,7])
+    self.assertEqual(self.sweep.top1.middle1.getSweepParamRange("sweep_param"), [1,3,5,7])
 
+    # Don't need to re-test everything we already did above.
     self.executeCommand("sweep sweep_param from 1 to 8 expstep 2")
-    self.assertIn("sweep_param", self.sweep.sweep_params_range)
-    self.assertNotIn("sweep_param", self.sweep.top1.sweep_params_range)
-    self.assertEqual(self.sweep.sweep_params_range["sweep_param"], [1,2,4,8])
+    self.assertTrue(self.sweep.hasSweepParamRange("sweep_param"))
+    self.assertEqual(self.sweep.getSweepParamRange("sweep_param"), [1,2,4,8])
 
     self.executeCommand("sweep sweep_param from 4 to 16 expstep 3")
-    self.assertIn("sweep_param", self.sweep.sweep_params_range)
-    self.assertNotIn("sweep_param", self.sweep.top1.sweep_params_range)
-    self.assertEqual(self.sweep.sweep_params_range["sweep_param"], [4, 12])
+    self.assertTrue(self.sweep.hasSweepParamRange("sweep_param"))
+    self.assertEqual(self.sweep.getSweepParamRange("sweep_param"), [4, 12])
 
   def test_selective_sweeps(self):
     self.executeCommand("sweep sweep_param for * from 1 to 8 linstep 1")
-    self.assertIn("sweep_param", self.sweep.top1.sweep_params_range)
-    self.assertNotIn("sweep_param", self.sweep.top1.middle1.sweep_params_range)
-    self.assertNotIn("sweep_param", self.sweep.top1.middle2.sweep_params_range)
-    self.assertEqual(self.sweep.top1.sweep_params_range["sweep_param"], [1,2,3,4,5,6,7,8])
+    self.assertTrue(self.sweep.top1.hasSweepParamRange("sweep_param"))
+    self.assertFalse(self.sweep.top1.middle1.hasSweepParamRange("sweep_param"))
+    self.assertFalse(self.sweep.top1.middle2.hasSweepParamRange("sweep_param"))
+    self.assertEqual(self.sweep.top1.getSweepParamRange("sweep_param"), [1,2,3,4,5,6,7,8])
 
     self.executeCommand("sweep sweep_param for top1 from 2 to 5 linstep 1")
-    self.assertIn("sweep_param", self.sweep.top1.sweep_params_range)
-    self.assertNotIn("sweep_param", self.sweep.top1.middle1.sweep_params_range)
-    self.assertNotIn("sweep_param", self.sweep.top1.middle2.sweep_params_range)
-    self.assertEqual(self.sweep.top1.sweep_params_range["sweep_param"], [2,3,4,5])
+    self.assertTrue(self.sweep.top1.hasSweepParamRange("sweep_param"))
+    self.assertFalse(self.sweep.top1.middle1.hasSweepParamRange("sweep_param"))
+    self.assertFalse(self.sweep.top1.middle2.hasSweepParamRange("sweep_param"))
+    self.assertEqual(self.sweep.top1.getSweepParamRange("sweep_param"), [2,3,4,5])
 
     self.executeCommand("sweep sweep_param for top1.* from 4 to 7 linstep 1")
-    self.assertIn("sweep_param", self.sweep.top1.middle1.sweep_params_range)
-    self.assertIn("sweep_param", self.sweep.top1.middle2.sweep_params_range)
-    self.assertEqual(self.sweep.top1.middle1.sweep_params_range["sweep_param"], [4,5,6,7])
-    self.assertEqual(self.sweep.top1.middle2.sweep_params_range["sweep_param"], [4,5,6,7])
+    self.assertTrue(self.sweep.top1.middle1.hasSweepParamRange("sweep_param"))
+    self.assertTrue(self.sweep.top1.middle2.hasSweepParamRange("sweep_param"))
+    self.assertEqual(self.sweep.top1.middle1.getSweepParamRange("sweep_param"), [4,5,6,7])
+    self.assertEqual(self.sweep.top1.middle2.getSweepParamRange("sweep_param"), [4,5,6,7])
+    self.assertNotEqual(self.sweep.top1.getSweepParamRange("sweep_param"), [4,5,6,7])
 
   def test_recursive_sweeps(self):
     self.executeCommand("sweep sweep_param for top1.** from 1 to 4 expstep 2")
-    self.assertIn("sweep_param", self.sweep.top1.sweep_params_range)
-    self.assertIn("sweep_param", self.sweep.top1.middle1.sweep_params_range)
-    self.assertIn("sweep_param", self.sweep.top1.middle2.sweep_params_range)
-    self.assertEqual(self.sweep.top1.sweep_params_range["sweep_param"], [1,2,4])
-    self.assertEqual(self.sweep.top1.middle1.sweep_params_range["sweep_param"], [1,2,4])
-    self.assertEqual(self.sweep.top1.middle2.sweep_params_range["sweep_param"], [1,2,4])
+    self.assertTrue(self.sweep.top1.hasSweepParamRange("sweep_param"))
+    self.assertTrue(self.sweep.top1.middle1.hasSweepParamRange("sweep_param"))
+    self.assertTrue(self.sweep.top1.middle2.hasSweepParamRange("sweep_param"))
+    self.assertEqual(self.sweep.top1.getSweepParamRange("sweep_param"), [1,2,4])
+    self.assertEqual(self.sweep.top1.middle1.getSweepParamRange("sweep_param"), [1,2,4])
+    self.assertEqual(self.sweep.top1.middle2.getSweepParamRange("sweep_param"), [1,2,4])
 
 if __name__ == "__main__":
   unittest.main()
