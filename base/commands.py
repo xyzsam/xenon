@@ -1,4 +1,5 @@
 import abc
+import copy
 import importlib
 import pyparsing as pp
 
@@ -177,7 +178,7 @@ class UseCommand(Command):
         # Import everything into the global namespace.
         for attr, val in package.__dict__.iteritems():
           if isinstance(val, XenonObj):
-            sweep_obj.__dict__[attr] = val
+            sweep_obj.__dict__[attr] = copy.deepcopy(val)
       else:
         sweep_obj.__dict__[path_terminator] = package
     except ImportError as e:

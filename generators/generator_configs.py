@@ -54,7 +54,7 @@ class ConfigGenerator(object):
   def __init__(self, configured_sweep):
     self.sweep = configured_sweep
 
-  def generate_configs(self):
+  def generate(self):
     """ Generate all configurations of this sweep. """
     param_range_len = self.discoverSweptParameters()
     indices_list = []
@@ -108,3 +108,6 @@ class ConfigGenerator(object):
           range_len[param_id] = len(param_range)
 
     return range_len
+
+def get_generator(configured_sweep):
+  return ConfigGenerator(configured_sweep)

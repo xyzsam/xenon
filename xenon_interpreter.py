@@ -4,6 +4,7 @@ import argparse
 import os
 import pyparsing as pp
 import sys
+import types
 
 # This is so that we can use the same fully qualified names in this script as
 # in the rest of the code, which is designed so that py.test can correctly
@@ -14,7 +15,7 @@ import xenon.base.exceptions as xe
 from xenon.base.commands import *
 from xenon.base.command_bindings import getParser, getCommandClass
 from xenon.base.datatypes import *
-from xenon.generators.config_generator import ConfigGenerator
+import xenon.generators
 
 class XenonInterpreter():
   """ Executes a Xenon file.
@@ -30,21 +31,25 @@ class XenonInterpreter():
     self.commands_ = []
     # Parser object for the complete line.
     self.line_parser_ = buildCommandParser()
-    # The result of the execution.
-    self.configured_sweep = None
 
   def handleXenonCommandError(self, command, err):
     msg = "On line %d: %s\n" % (command.lineno, command.line)
-    msg += "%s: %s" % (err.__class__.__name__, str(err))
-    print msg
+    msg += "%s: %s\n" % (err.__class__.__name__, str(err))
+    sys.stderr.write(msg)
     sys.exit(1)
 
   def handleGeneratorError(self, target, err):
+    """ Handle certain exceptions thrown during generation.
+
+    TODO: This isn't a great mechanism. Redo.
+    """
     msg = "Error occurred in generating %s\n" % target
-    if isinstance(err, AttributeError):
+    if isinstance(err, ImportError):
+      msg += "The generator module generator_%s was not found.\n" % target
+    elif isinstance(err, AttributeError):
       msg += "Do you have a generator for target %s?\n" % target
-    msg += "%s: %s" % (err.__class__.__name__, str(err))
-    print msg
+    msg += "%s: %s\n" % (err.__class__.__name__, str(err))
+    sys.stderr.write(msg)
     sys.exit(1)
 
   def handleSyntaxError(self, parser_err, line_number):
@@ -52,8 +57,8 @@ class XenonInterpreter():
     msg = "Invalid syntax on line %s:\n" % line_number
     msg += "  %s\n" % parser_err.line
     msg += "  %s^\n" % spaces
-    msg += "  %s" % str(parser_err)
-    print msg
+    msg += "  %s\n" % str(parser_err)
+    sys.stderr.write(msg)
     sys.exit(1)
 
   def parse(self):
@@ -94,20 +99,37 @@ class XenonInterpreter():
       except xe.XenonError as e:
         self.handleXenonCommandError(command, e)
 
-    self.configured_sweep = current_sweep
+      if current_sweep.done:
+        if DEBUG:
+          interpreter.configured_sweep.dump()
+        self.generate_outputs(current_sweep)
+        current_sweep = DesignSweep()
 
-  def generate_outputs(self):
-    generator = ConfigGenerator(self.configured_sweep)
-    for output in self.configured_sweep.generate_outputs:
+  def generate_outputs(self, sweep):
+    for output in sweep.generate_outputs:
+      generator_module = self.get_generator_module(output)
       try:
-        handler = getattr(generator, "generate_%s" % output)
+        generator = generator_module.get_generator(sweep)
       except AttributeError as e:
         self.handleGeneratorError(output, e)
 
       try:
-        configs_generated = handler()
+        configs_generated = generator.generate()
       except xe.XenonError as e:
         self.handleConfigGeneratorError(output, e)
+
+  def get_generator_module(self, generate_target):
+    """ Returns the module named generator_[generate_target].
+
+    This module must be under xenon.generators. If such a module does not
+    exist, then None is returned.
+    """
+    module_name = "generator_%s" % generate_target
+    try:
+      module = importlib.import_module(".".join(["xenon", "generators", module_name]))
+    except ImportError as e:
+      self.handleGeneratorError(generate_target, e)
+    return module
 
 def main():
   parser = argparse.ArgumentParser()
@@ -120,9 +142,6 @@ def main():
   interpreter = XenonInterpreter(args.xenon_file)
   interpreter.parse()
   interpreter.execute()
-  if DEBUG:
-    interpreter.configured_sweep.dump()
-  interpreter.generate_outputs()
 
 if __name__ == "__main__":
   main()
