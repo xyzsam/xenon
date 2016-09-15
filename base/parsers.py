@@ -1,5 +1,5 @@
 from pyparsing import *
-from expressions import convertToExpressionTree
+from xenon.base.expressions import convertToExpressionTree
 
 CMD_BEGIN = "begin"
 CMD_END = "end"

@@ -3,18 +3,16 @@
 import pyparsing as pp
 import unittest
 
-from params import Param
-from parsers import *
-from commands import *
-from base_datatypes import DesignSweep
-from datatypes import Benchmark, Sweepable
-import command_bindings
+import xenon.base.command_bindings as command_bindings
+from xenon.base.commands import *
+from xenon.base.datatypes import DesignSweep, Param
+from xenon.base.parsers import *
 
-import test_module as tm
+import test_module
 
 class CommandTestCase(unittest.TestCase):
   def setUp(self):
-    self.sweep = tm.createFakeSweepEnviron()
+    self.sweep = test_module.createFakeSweepEnviron()
 
   def executeCommand(self, command_str, command_type=None):
     """ Execute the command.
@@ -41,7 +39,8 @@ class BeginAndEndCommands(CommandTestCase):
 
 class UseCommand(CommandTestCase):
   def runTest(self):
-    self.executeCommand("use test_module")
+    # Must import fully qualified name while we are under tests/.
+    self.executeCommand("use xenon.tests.test_module")
     self.assertIn("USE_COMMAND_SWEEP_TEST_OBJ", self.sweep.__dict__)
 
 class SelectionCommand(CommandTestCase):

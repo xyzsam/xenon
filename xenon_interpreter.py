@@ -1,12 +1,14 @@
+#!/usr/bin/env python
+
 import argparse
 import pyparsing as pp
 import sys
 
-from base_datatypes import *
-from commands import *
-from command_bindings import getParser, getCommandClass
-from xenon_generator import XenonGenerator
-import xenon_exceptions as xe
+from xenon.base.commands import *
+from xenon.base.command_bindings import getParser, getCommandClass
+from xenon.base.datatypes import *
+import xenon.base.xenon_exceptions as xe
+from xenon.generators.xenon_generator import XenonGenerator
 
 class XenonInterpreter():
   """ Executes a Xenon file.

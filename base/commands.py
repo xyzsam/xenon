@@ -2,10 +2,10 @@ import abc
 import importlib
 import pyparsing as pp
 
-from base_datatypes import XenonObj, Sweepable
-from expressions import Expression
-from parsers import *
-import xenon_exceptions as xe
+from xenon.base.datatypes import XenonObj, Sweepable
+from xenon.base.expressions import Expression
+from xenon.base.parsers import *
+from xenon.base.xenon_exceptions import *
 
 def recursiveSelect(root, objtype=object):
   """ Recursively selects all attributes of type objtype from root.  """
@@ -76,7 +76,7 @@ class SelectionCommand(Command):
       try:
         current_view = getattr(current_view, token)
       except AttributeError:
-        raise xe.XenonSelectionError(".".join(self.tokens))
+        raise XenonSelectionError(".".join(self.tokens))
       if not isinstance(current_view, XenonObj):
         selection_path = ".".join(self.tokens[:i+1])
         raise TypeError("%s is not of type XenonObj.")
@@ -157,7 +157,7 @@ class SetCommand(Command):
         is_applied = True
 
     if not is_applied:
-      raise xe.XenonEmptySelectionError(self.param)
+      raise XenonEmptySelectionError(self.param)
 
   def execute(self, sweep_obj):
     self.setParam(sweep_obj)
@@ -181,7 +181,7 @@ class UseCommand(Command):
       else:
         sweep_obj.__dict__[path_terminator] = package
     except ImportError as e:
-      raise xe.XenonImportError(self.package_path)
+      raise XenonImportError(self.package_path, e)
 
 class GenerateCommand(Command):
   def __init__(self, lineno, line, parse_result):
@@ -209,8 +209,8 @@ class SweepCommand(Command):
         continue
       ret = obj.setSweepParameter(self.sweep_param, self.sweep_start, self.sweep_end,
                                   self.step, self.step_type)
-      if ret == xe.SUCCESS:
+      if ret == SUCCESS:
         is_applied_at_least_once = True
 
     if not is_applied_at_least_once:
-      raise xe.XenonAttributeError(self.sweep_param)
+      raise XenonAttributeError(self.sweep_param)

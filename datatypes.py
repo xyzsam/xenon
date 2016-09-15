@@ -1,5 +1,6 @@
-from base_datatypes import Sweepable
-import params
+from xenon.base.datatypes import Sweepable
+
+import params as params
 
 class Benchmark(Sweepable):
   sweepable_params = [

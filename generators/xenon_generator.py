@@ -2,9 +2,9 @@ import itertools
 import pprint
 import sys
 
-from base_datatypes import *
-from commands import recursiveSelect
-import xenon_exceptions as xe
+from xenon.base.datatypes import *
+from xenon.base.commands import recursiveSelect
+import xenon.base.exceptions as xe
 
 class SweepableView(XenonObj):
   """ An overlay for Sweepable objects.

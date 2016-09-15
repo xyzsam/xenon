@@ -13,9 +13,9 @@ class SweepNotInitializedError(XenonError):
         "Sweep has not been initialized with a begin statement.")
 
 class XenonImportError(XenonError):
-  def __init__(self, package_path):
+  def __init__(self, package_path, import_err):
     super(XenonImportError, self).__init__(
-        "Failed to import package %s" % package_path)
+        "Failed to import package %s because: %s" % (package_path, str(import_err)))
 
 class XenonSelectionError(XenonError):
   def __init__(self, selection_path):

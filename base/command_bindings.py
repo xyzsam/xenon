@@ -1,6 +1,7 @@
-from commands import *
-from parsers import *
 from collections import namedtuple
+
+from xenon.base.commands import *
+from xenon.base.parsers import *
 
 Binding = namedtuple("Binding", "parserBuilder, commandClass")
 

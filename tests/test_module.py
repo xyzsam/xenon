@@ -2,7 +2,7 @@
 #
 # This is implemented as a module to also enable testing the use command.
 
-from base_datatypes import *
+from xenon.base.datatypes import *
 
 fake_param = Param("sweep_param", 0)
 class FakeDesignSweep(DesignSweep):

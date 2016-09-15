@@ -6,10 +6,9 @@
 import pyparsing as pp
 import unittest
 
-from parsers import *
-from commands import *
-from base_datatypes import DesignSweep
-from xenon_file_parser import XenonFileParser
+from xenon.base.commands import *
+from xenon.base.datatypes import DesignSweep
+from xenon.base.parsers import *
 
 # Put the base unittest class in a separate class so that it doesn't get run as
 # a test case.
