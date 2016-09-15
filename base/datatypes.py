@@ -3,7 +3,7 @@ import pprint
 import uuid
 
 from xenon.base.parsers import *
-import xenon.base.xenon_exceptions as xe
+import xenon.base.exceptions as xe
 
 class XenonObj(object):
   """ Base class for any object defined by the Xenon system. """

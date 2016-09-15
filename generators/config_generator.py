@@ -50,7 +50,7 @@ class SweepableView(XenonObj):
     return "{0}({1}(\"{2}\"))".format(
         self.__class__.__name__, self.sweepable.__class__.__name__, self.sweepable.name)
 
-class XenonGenerator(object):
+class ConfigGenerator(object):
   def __init__(self, configured_sweep):
     self.sweep = configured_sweep
 

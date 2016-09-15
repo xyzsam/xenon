@@ -3,9 +3,9 @@ import importlib
 import pyparsing as pp
 
 from xenon.base.datatypes import XenonObj, Sweepable
+from xenon.base.exceptions import *
 from xenon.base.expressions import Expression
 from xenon.base.parsers import *
-from xenon.base.xenon_exceptions import *
 
 def recursiveSelect(root, objtype=object):
   """ Recursively selects all attributes of type objtype from root.  """

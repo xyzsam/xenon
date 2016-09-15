@@ -1,20 +1,26 @@
 #!/usr/bin/env python
 
 import argparse
+import os
 import pyparsing as pp
 import sys
 
+# This is so that we can use the same fully qualified names in this script as
+# in the rest of the code, which is designed so that py.test can correctly
+# import modules.
+sys.path.append(os.pardir)
+
+import xenon.base.exceptions as xe
 from xenon.base.commands import *
 from xenon.base.command_bindings import getParser, getCommandClass
 from xenon.base.datatypes import *
-import xenon.base.xenon_exceptions as xe
-from xenon.generators.xenon_generator import XenonGenerator
+from xenon.generators.config_generator import ConfigGenerator
 
 class XenonInterpreter():
   """ Executes a Xenon file.
 
   The result of the execution is a DesignSweep object, which can then be passed
-  to a XenonGenerator object to expand the design sweep into each configuration.
+  to a ConfigGenerator object to expand the design sweep into each configuration.
   This result can be accessible through the XenonInterpreter.configured_sweep
   attribute.
   """
@@ -33,7 +39,7 @@ class XenonInterpreter():
     print msg
     sys.exit(1)
 
-  def handleXenonGeneratorError(self, target, err):
+  def handleGeneratorError(self, target, err):
     msg = "Error occurred in generating %s\n" % target
     if isinstance(err, AttributeError):
       msg += "Do you have a generator for target %s?\n" % target
@@ -91,17 +97,17 @@ class XenonInterpreter():
     self.configured_sweep = current_sweep
 
   def generate_outputs(self):
-    generator = XenonGenerator(self.configured_sweep)
+    generator = ConfigGenerator(self.configured_sweep)
     for output in self.configured_sweep.generate_outputs:
       try:
         handler = getattr(generator, "generate_%s" % output)
       except AttributeError as e:
-        self.handleXenonGeneratorError(output, e)
+        self.handleGeneratorError(output, e)
 
       try:
         configs_generated = handler()
       except xe.XenonError as e:
-        self.handleXenonGeneratorError(output, e)
+        self.handleConfigGeneratorError(output, e)
 
 def main():
   parser = argparse.ArgumentParser()
@@ -111,7 +117,6 @@ def main():
 
   global DEBUG
   DEBUG = args.debug
-  # TODO: These classes need some renaming.
   interpreter = XenonInterpreter(args.xenon_file)
   interpreter.parse()
   interpreter.execute()

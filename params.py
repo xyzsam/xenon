@@ -1,6 +1,6 @@
 # Definitions of sweep parameters.
 
-from xenon.datatypes import *
+from xenon.base.datatypes import Param
 
 cycle_time = Param("cycle_time", 1)
 unrolling = Param("unrolling", 1)
