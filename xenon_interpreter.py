@@ -17,6 +17,8 @@ from xenon.base.command_bindings import getParser, getCommandClass
 from xenon.base.datatypes import *
 import xenon.generators
 
+DEBUG = False
+
 class XenonInterpreter():
   """ Executes a Xenon file.
 
@@ -25,12 +27,15 @@ class XenonInterpreter():
   This result can be accessible through the XenonInterpreter.configured_sweep
   attribute.
   """
-  def __init__(self, filename):
+  def __init__(self, filename, test_mode=False, stream=sys.stdout):
     self.filename = filename
     # List of (line_number, ParseResult) tuples.
     self.commands_ = []
     # Parser object for the complete line.
     self.line_parser_ = buildCommandParser()
+    self.test_mode = test_mode
+    # Where to print debugging information.
+    self.stream = stream
 
   def handleXenonCommandError(self, command, err):
     msg = "On line %d: %s\n" % (command.lineno, command.line)
@@ -93,7 +98,7 @@ class XenonInterpreter():
     current_sweep = DesignSweep()
     for command in self.commands_:
       if DEBUG:
-        print command.line
+        self.stream.write(command.line + "\n")
       try:
         command(current_sweep)
       except xe.XenonError as e:
@@ -101,7 +106,8 @@ class XenonInterpreter():
 
       if current_sweep.done:
         if DEBUG:
-          interpreter.configured_sweep.dump()
+          self.stream.write("Configured sweep:\n")
+          current_sweep.dump(stream=self.stream)
         self.generate_outputs(current_sweep)
         current_sweep = DesignSweep()
 
@@ -114,9 +120,17 @@ class XenonInterpreter():
         self.handleGeneratorError(output, e)
 
       try:
-        configs_generated = generator.generate()
+        generated_configs = generator.generate()
       except xe.XenonError as e:
         self.handleConfigGeneratorError(output, e)
+
+      if self.test_mode:
+        for config in generated_configs:
+          config.dump(stream=self.stream)
+
+  def run(self):
+    self.parse()
+    self.execute()
 
   def get_generator_module(self, generate_target):
     """ Returns the module named generator_[generate_target].
@@ -135,13 +149,13 @@ def main():
   parser = argparse.ArgumentParser()
   parser.add_argument("xenon_file", help="Xenon input file.")
   parser.add_argument("-d", "--debug", action="store_true", help="Turn on debugging output.")
+  parser.add_argument("-t", "--test", action="store_true", help="Testing mode.")
   args = parser.parse_args()
 
   global DEBUG
   DEBUG = args.debug
-  interpreter = XenonInterpreter(args.xenon_file)
-  interpreter.parse()
-  interpreter.execute()
+  interpreter = XenonInterpreter(args.xenon_file, test_mode=args.test)
+  interpreter.run()
 
 if __name__ == "__main__":
   main()
