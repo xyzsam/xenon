@@ -1,6 +1,6 @@
 # A fake sweep environment for testing purposes.
 #
-# This is implemented as a module to enable testing the use command.
+# This is implemented as a module to also enable testing the use command.
 
 from base_datatypes import *
 

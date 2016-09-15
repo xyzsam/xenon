@@ -2,7 +2,7 @@ from base_datatypes import Sweepable
 import params
 
 class Benchmark(Sweepable):
-  sweepable_params = Sweepable.sweepable_params + [
+  sweepable_params = [
       params.cycle_time,
       params.pipelining,
   ]
@@ -22,7 +22,7 @@ class Benchmark(Sweepable):
     getattr(self, function_name).add_loop(loop_name)
 
 class Array(Sweepable):
-  sweepable_params = Sweepable.sweepable_params + [
+  sweepable_params = [
       params.partition_type,
       params.partition_factor,
   ]
@@ -35,7 +35,7 @@ class Array(Sweepable):
     self.partition_factor = params.partition_factor.default
 
 class Function(Sweepable):
-  sweepable_params = Sweepable.sweepable_params + []
+  sweepable_params = []
 
   def __init__(self, name):
     super(Function, self).__init__(name)
@@ -46,7 +46,7 @@ class Function(Sweepable):
     setattr(self, loop_name, l)
 
 class Loop(Sweepable):
-  sweepable_params = Sweepable.sweepable_params + [
+  sweepable_params = [
       params.unrolling,
   ]
 

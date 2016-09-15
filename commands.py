@@ -8,7 +8,7 @@ from parsers import *
 import xenon_exceptions as xe
 
 def recursiveSelect(root, objtype=object):
-  """ Recursively selects all attributes of type XenonObj from root. """
+  """ Recursively selects all attributes of type objtype from root.  """
   assert(isinstance(root, objtype))
   selected_objs = []
   for obj in root.iterattrvalues(objtype=objtype):
@@ -158,6 +158,10 @@ class SetCommand(Command):
     for obj in selected_objs:
       if hasattr(obj, self.param):
         setattr(obj, self.param, value)
+        # Remove this parameter from obj.sweep_params_range, if it exists, so that
+        # the sweep generator does not ignore this value.
+        if isinstance(obj, Sweepable) and obj.hasSweepParamRange(self.param):
+          obj.removeFromSweepParamRange(self.param)
         is_applied = True
 
     if not is_applied:

@@ -5,10 +5,11 @@ import sys
 from base_datatypes import *
 from commands import *
 from command_bindings import getParser, getCommandClass
+from xenon_generator import XenonGenerator
 import xenon_exceptions as xe
 
 class XenonInterpreter(object):
-  """ Executes a Xenon a file.
+  """ Executes a Xenon file.
 
   The result of the execution is a DesignSweep object, which can then be passed
   to a XenonGenerator object to expand the design sweep into each configuration.
@@ -25,8 +26,12 @@ class XenonInterpreter(object):
     self.configured_sweep = None
 
   def handleXenonError(self, command, e):
-    msg = "On line %d: %s\n" % (command.lineno, command.line)
+    msg = ""
+    if command != None:
+      msg = "On line %d: %s\n" % (command.lineno, command.line)
     msg += "%s: %s" % (e.__class__.__name__, str(e))
+    print msg
+    sys.exit(1)
 
   def handleSyntaxError(self, parser_err, line_number):
     spaces =  ' ' * (parser_err.col - 1)
@@ -76,15 +81,24 @@ class XenonInterpreter(object):
 
     self.configured_sweep = current_sweep
 
+  def generate(self):
+    generator = XenonGenerator(self.configured_sweep)
+    try:
+      generator.generate()
+    except xe.XenonError as e:
+      self.handleXenonError(None, e)
+
 def main():
   parser = argparse.ArgumentParser()
   parser.add_argument("xenon_file", help="Xenon input file.")
   args = parser.parse_args()
 
+  # TODO: These classes need some renaming.
   interpreter = XenonInterpreter(args.xenon_file)
   interpreter.parse()
   interpreter.execute()
   interpreter.configured_sweep.dump()
+  interpreter.generate()
 
 if __name__ == "__main__":
   main()

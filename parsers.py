@@ -43,17 +43,6 @@ special_literals = [
     LIT_STARSTAR,
 ]
 
-# attributes = [
-#     "output_dir",
-#     "source_dir",
-#     "simulator",
-#     "memory_type",
-#     "sweep_type",
-#     "output",
-#     "trace",
-#     "condor",
-# ]
-
 reserved = {}
 
 SOL = LineStart()
@@ -111,7 +100,6 @@ def buildExpressionParser():
   """
   kws = MatchFirst(map(CaselessKeyword, [k for k in reserved.iterkeys()]))
   valid_expression = Group(OneOrMore(Word(alphanums + "()/+-<>=._")))
-  # return ~kws + valid_expression.setResultsName("expression") #.setParseAction(convertToExpressionTree)
   return valid_expression.setResultsName("expression").setParseAction(convertToExpressionTree)
 
 def buildSetParser():

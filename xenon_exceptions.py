@@ -53,3 +53,13 @@ class XenonAttributeError(XenonError):
   def __init__(self, attr):
     super(XenonAttributeError, self).__init__(
         "No objects with sweepable attribute \"%s\" were found." % attr)
+
+class XenonMismatchingRangeError(XenonError):
+  def __init__(self, param_name, this_length, prev_length):
+    super(XenonMismatchingRangeError, self).__init__(
+        "Parameter %s has sweep range of length %d, which is not equal to a previous "
+        "sweep command on this parameter with a sweep range of length %d." %
+        (param_name, this_length, prev_length))
+    self.param_name = param_name
+    self.this_length = this_length
+    self.prev_length = prev_length
