@@ -57,16 +57,16 @@ class SelectionCommand(CommandTestCase):
     self.assertIn(self.sweep.top1.middle2, selected_objs)
 
     selected_objs = self.executeCommand("for *", command_type=KW_FOR)
-    self.assertEqual(len(selected_objs), 1)
+    self.assertEqual(len(selected_objs), 2)
+    self.assertIn(self.sweep, selected_objs)
     self.assertIn(self.sweep.top1, selected_objs)
-    self.assertNotIn(self.sweep.top0, selected_objs)
 
     selected_objs = self.executeCommand("for top1.*", command_type=KW_FOR)
-    self.assertEqual(len(selected_objs), 2)
+    self.assertEqual(len(selected_objs), 3)
     self.assertIn(self.sweep.top1.middle1, selected_objs)
     self.assertIn(self.sweep.top1.middle2, selected_objs)
 
-    with self.assertRaises(xe.NotXenonObjError):
+    with self.assertRaises(TypeError):
       selected_objs = self.executeCommand("for top1.middle0", command_type=KW_FOR)
       self.assertEqual(len(selected_objs), 0)
 
@@ -97,12 +97,12 @@ class SetCommand(CommandTestCase):
 
   def test_set_with_selections(self):
     self.executeCommand("set sweep_param for * 3")
-    self.assertEqual(self.sweep.sweep_param, None)
+    self.assertEqual(self.sweep.sweep_param, 3)
     self.assertEqual(self.sweep.top1.sweep_param, 3)
     self.assertEqual(self.sweep.top1.middle1.sweep_param, None)
 
     self.executeCommand("set sweep_param for * \"astring\"")
-    self.assertEqual(self.sweep.sweep_param, None)
+    self.assertEqual(self.sweep.sweep_param, "astring")
     self.assertEqual(self.sweep.top1.sweep_param, "astring")
     self.assertEqual(self.sweep.top1.middle1.sweep_param, None)
 
@@ -119,12 +119,12 @@ class SetCommand(CommandTestCase):
     self.executeCommand("set sweep_param for top1.* 4")
     self.assertEqual(self.sweep.top1.middle1.sweep_param, 4)
     self.assertEqual(self.sweep.top1.middle2.sweep_param, 4)
-    self.assertEqual(self.sweep.top1.sweep_param, None)
+    self.assertEqual(self.sweep.top1.sweep_param, 4)
 
     self.executeCommand("set sweep_param for top1.* \"mystring\"")
     self.assertEqual(self.sweep.top1.middle1.sweep_param, "mystring")
     self.assertEqual(self.sweep.top1.middle2.sweep_param, "mystring")
-    self.assertEqual(self.sweep.top1.sweep_param, None)
+    self.assertEqual(self.sweep.top1.sweep_param, "mystring")
 
   def test_set_with_recursive_selections(self):
     self.executeCommand("set sweep_param for ** 4")
@@ -179,7 +179,7 @@ class SweepCommand(CommandTestCase):
     self.assertTrue(self.sweep.top1.middle2.hasSweepParamRange("sweep_param"))
     self.assertEqual(self.sweep.top1.middle1.getSweepParamRange("sweep_param"), [4,5,6,7])
     self.assertEqual(self.sweep.top1.middle2.getSweepParamRange("sweep_param"), [4,5,6,7])
-    self.assertNotEqual(self.sweep.top1.getSweepParamRange("sweep_param"), [4,5,6,7])
+    self.assertEqual(self.sweep.top1.getSweepParamRange("sweep_param"), [4,5,6,7])
 
   def test_recursive_sweeps(self):
     self.executeCommand("sweep sweep_param for top1.** from 1 to 4 expstep 2")

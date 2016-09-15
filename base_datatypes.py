@@ -123,9 +123,6 @@ class Sweepable(XenonObj):
       SUCCESS: otherwise.
 
     Throws:
-      XenonInvalidRangeError: if the range was not valid. This could happen if
-        the length of the sweep parameter range for this parameter is not equal
-        to the range of the other parameters.
       XenonInvalidStepTypeError: if step_type is not recognized.
       XenonInvalidStepAmountError: if the step amount would produce an invalid range.
     """
@@ -203,11 +200,6 @@ class DesignSweep(Sweepable):
     self.source_dir = ""
     self.memory_type = ""
     self.simulator = ""
-
-  # TODO: Deprecated?
-  def __iter__(self):
-    for key in self.__dict__:
-      yield key
 
   def initializeSweep(self, name, sweep_type):
     self.name = name

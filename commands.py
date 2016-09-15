@@ -54,9 +54,6 @@ class SelectionCommand(Command):
     """ Constructs a selection argument given a set of parsed tokens. """
     super(SelectionCommand, self).__init__(lineno, line, parse_result.selection)
     self.tokens = list(parse_result.selection)
-    # This is an object reference to some object in some environment. It will
-    # be resolved later.
-    self.selected_objs = None
 
   def select(self, env):
     """ Return a list of objects in an environment selected by this selection.
@@ -65,17 +62,12 @@ class SelectionCommand(Command):
     operators, and it must return an object that does the same.
     """
     if not isinstance(env, XenonObj):
-      # TODO: TypeError instead?
-      raise xe.NotXenonObjError(env)
+      raise TypeError("%s is not of type XenonObj." % str(env))
 
-    # TODO: Consider making this equal to ** - then users can use the sweep and
-    # set commands without a selection and get the behavior of it affecting
-    # everything.
+    # If there was no selection defined, then the selection is implicitly the
+    # entire environment, recursively..
     if len(self.tokens) == 0:
       self.tokens.append(LIT_STARSTAR)
-      # If there was no selection defined, then the selection is implicitly the
-      # entire environment.
-      # return [env]
 
     current_view = env
     for i, token in enumerate(self.tokens):
@@ -86,18 +78,18 @@ class SelectionCommand(Command):
       except AttributeError:
         raise xe.XenonSelectionError(".".join(self.tokens))
       if not isinstance(current_view, XenonObj):
-        raise xe.NotXenonObjError(".".join(self.tokens[:i+1]))
+        selection_path = ".".join(self.tokens[:i+1])
+        raise TypeError("%s is not of type XenonObj.")
 
+    selected_objs = []
     if token == LIT_STAR:
-      self.selected_objs = [v for v in current_view.iterattrvalues(objtype=XenonObj)]
+      selected_objs = [v for v in current_view.iterattrvalues(objtype=XenonObj)]
     elif token == LIT_STARSTAR:
-      self.selected_objs = recursiveSelect(current_view, objtype=XenonObj)
-      # Remember: ** returns not just all the children of the current view, but
-      # the current view itself.
-      self.selected_objs.extend([current_view])
-    else:
-      self.selected_objs = [current_view]
-    return self.selected_objs
+      selected_objs = recursiveSelect(current_view, objtype=XenonObj)
+    # Remember: * and ** return not just all the children of the current view,
+    # but the current view itself.
+    selected_objs.extend([current_view])
+    return selected_objs
 
   def execute(self, env):
     return self.select(env)
@@ -165,7 +157,7 @@ class SetCommand(Command):
         is_applied = True
 
     if not is_applied:
-      raise xe.XenonAttributeError(self.param)
+      raise xe.XenonEmptySelectionError(self.param)
 
   def execute(self, sweep_obj):
     self.setParam(sweep_obj)

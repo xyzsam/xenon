@@ -132,14 +132,14 @@ def buildRangeParser():
   range = "from" start "to" end [step amount]
   """
   step_type = reserved["linstep"] | reserved["expstep"]
-  step = Group(step_type.setResultsName("type") +
-               Word(nums).setResultsName("amount")).setResultsName("step")
+  step = Group(Optional(step_type, default="linstep").setResultsName("type") +
+               Optional(Word(nums), default="1").setResultsName("amount")).setResultsName("step")
   range_parser = Group(
       reserved["from"] +
       Word(nums).setResultsName("start") +
       reserved["to"] +
       Word(nums).setResultsName("end") +
-      Optional(step, default=["linstep", "1"])).setResultsName("range")
+      step).setResultsName("range")
   return range_parser
 
 def buildSweepParser():
