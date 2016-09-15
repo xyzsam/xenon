@@ -58,6 +58,9 @@ class Param(XenonObj):
   def __ne__(self, other):
     return not self.__eq__(other)
 
+  def __str__(self):
+    return "{0}(\"{1}\")".format(self.__class__.__name__, self.name)
+
   def __repr__(self):
     return "{0}(\"{1}\",{2})".format(self.__class__.__name__, self.name, self.default)
 
@@ -94,6 +97,12 @@ class Sweepable(XenonObj):
       setattr(self, param.name, None)
       self.sweepable_params_dict_[param.name] = param.id
       self.sweepable_params_dict_[param.id] = param.name
+
+  def getParamDefaultValue(self, name):
+    for param in self.__class__.sweepable_params:
+      if param.name == name:
+        return param.default
+    return None
 
   def getParamId(self, name):
     if name in self.sweepable_params_dict_:

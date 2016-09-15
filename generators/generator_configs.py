@@ -30,9 +30,9 @@ class SweepableView(XenonObj):
       setattr(self, child_name, SweepableView(child))
       self.attrs.append(child_name)
 
-  def dump(self):
+  def dump(self, stream=sys.stdout):
     dictified = self.dictify()
-    printer = pprint.PrettyPrinter(indent=2)
+    printer = pprint.PrettyPrinter(indent=2, stream=stream)
     printer.pprint(dictified)
 
   def dictify(self):
@@ -41,8 +41,12 @@ class SweepableView(XenonObj):
     for attr_name in self.attrs:
       attr_value = getattr(self, attr_name)
       if isinstance(attr_value, SweepableView):
-        children[attr_name] = attr_value.dictify()
+        # If this object has SweepableView children, then we want to identify
+        # its type through the string.
+        expanded_name = str(getattr(self.sweepable, attr_name))
+        children[expanded_name] = attr_value.dictify()
       else:
+        # Otherwise, this is just a plain variable, so just use attr_name.
         children[attr_name] = attr_value
     return children
 
@@ -67,18 +71,17 @@ class ConfigGenerator(object):
     # index_combinations is a generator of tuples, where the ith value is the
     # index of the parameter range with parameter id id_list[i].
     index_combinations = itertools.product(*indices_list)
-    top_view = SweepableView(self.sweep)
-    configs_generated = 0
+    generated_configs = []
     for indices in index_combinations:
+      top_view = SweepableView(self.sweep)
       self.applySweepParamValues(top_view, id_list, indices)
-      configs_generated += 1
-      top_view.dump()
+      self.applyDefaultParamValues(top_view)
+      generated_configs.append(top_view)
 
-    print ""
-    print "Total configurations generated: %d" % configs_generated
-    return configs_generated
+    return generated_configs
 
   def applySweepParamValues(self, root_view, ids, indices):
+    """ Recursively apply the values of the swept parameter ranges. """
     for param_id, param_idx in zip(ids, indices):
       if param_id in root_view.sweepable.sweep_params_range:
         param_value = root_view.sweepable.sweep_params_range[param_id][param_idx]
@@ -87,6 +90,15 @@ class ConfigGenerator(object):
 
     for child_view in root_view.iterattrvalues(objtype=SweepableView):
       self.applySweepParamValues(child_view, ids, indices)
+
+  def applyDefaultParamValues(self, root_view):
+    """ Set any parameters untouched by 'set' or 'sweep' commands to default values. """
+    for attr in root_view.attrs:
+      if getattr(root_view, attr) == None:
+        setattr(root_view, attr, root_view.sweepable.getParamDefaultValue(attr))
+
+    for child_view in root_view.iterattrvalues(objtype=SweepableView):
+      self.applyDefaultParamValues(child_view)
 
   def discoverSweptParameters(self):
     """ Return a list of all swept Param objects.

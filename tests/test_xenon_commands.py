@@ -1,6 +1,5 @@
 # A suite of unit tests for command execution.
 
-import pyparsing as pp
 import unittest
 
 import xenon.base.command_bindings as command_bindings
