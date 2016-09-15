@@ -50,12 +50,11 @@ class SweepableView(XenonObj):
     return "{0}({1}(\"{2}\"))".format(
         self.__class__.__name__, self.sweepable.__class__.__name__, self.sweepable.name)
 
-class XenonGenerator(XenonObj):
+class XenonGenerator(object):
   def __init__(self, configured_sweep):
-    super(XenonGenerator, self).__init__()
     self.sweep = configured_sweep
 
-  def generate(self):
+  def generate_configs(self):
     """ Generate all configurations of this sweep. """
     param_range_len = self.discoverSweptParameters()
     indices_list = []
@@ -69,9 +68,15 @@ class XenonGenerator(XenonObj):
     # index of the parameter range with parameter id id_list[i].
     index_combinations = itertools.product(*indices_list)
     top_view = SweepableView(self.sweep)
+    configs_generated = 0
     for indices in index_combinations:
       self.applySweepParamValues(top_view, id_list, indices)
+      configs_generated += 1
       top_view.dump()
+
+    print ""
+    print "Total configurations generated: %d" % configs_generated
+    return configs_generated
 
   def applySweepParamValues(self, root_view, ids, indices):
     for param_id, param_idx in zip(ids, indices):
