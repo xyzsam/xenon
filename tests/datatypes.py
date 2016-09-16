@@ -34,8 +34,6 @@ class Array(Sweepable):
     super(Array, self).__init__(name)
     self.size = size
     self.word_length = word_length
-    self.partition_type = params.partition_type.default
-    self.partition_factor = params.partition_factor.default
 
 class Function(Sweepable):
   sweepable_params = []

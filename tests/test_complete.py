@@ -1,6 +1,5 @@
 # End-to-end tests.
 
-import filecmp
 import json
 import os
 import shutil

@@ -39,42 +39,98 @@
         }, 
         "Function(\"aes256_encrypt_ecb\")": {
           "Loop(\"ecb1\")": {
-            "name": "ecb1"
+            "name": "ecb1", 
+            "unrolling": 2
           }, 
           "Loop(\"ecb2\")": {
-            "name": "ecb2"
+            "name": "ecb2", 
+            "unrolling": 1
           }, 
           "Loop(\"ecb3\")": {
-            "name": "ecb3"
+            "name": "ecb3", 
+            "unrolling": 2
           }, 
           "name": "aes256_encrypt_ecb"
         }, 
         "Function(\"aes_addRoundKey\")": {
           "Loop(\"addkey\")": {
-            "name": "addkey"
+            "name": "addkey", 
+            "unrolling": 1
           }, 
           "name": "aes_addRoundKey"
         }, 
         "Function(\"aes_addRoundKey_cpy\")": {
           "Loop(\"cpkey\")": {
-            "name": "cpkey"
+            "name": "cpkey", 
+            "unrolling": 1
           }, 
           "name": "aes_addRoundKey_cpy"
         }, 
         "Function(\"aes_subBytes\")": {
           "Loop(\"sub\")": {
-            "name": "sub"
+            "name": "sub", 
+            "unrolling": 1
           }, 
           "name": "aes_subBytes"
         }, 
+        "cycle_time": 1, 
         "name": "aes-aes", 
+        "pipelining": 1
+      }, 
+      "Benchmark(\"bfs-bulk\")": {
+        "Array(\"edges\")": {
+          "name": "edges", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 4096, 
+          "word_length": 8
+        }, 
+        "Array(\"level\")": {
+          "name": "level", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 256, 
+          "word_length": 1
+        }, 
+        "Array(\"level_counts\")": {
+          "name": "level_counts", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 10, 
+          "word_length": 8
+        }, 
+        "Array(\"nodes\")": {
+          "name": "nodes", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 512, 
+          "word_length": 8
+        }, 
+        "Function(\"bfs\")": {
+          "Loop(\"loop_horizons\")": {
+            "name": "loop_horizons", 
+            "unrolling": 1
+          }, 
+          "Loop(\"loop_neighbors\")": {
+            "name": "loop_neighbors", 
+            "unrolling": 1
+          }, 
+          "Loop(\"loop_nodes\")": {
+            "name": "loop_nodes", 
+            "unrolling": 1
+          }, 
+          "name": "bfs"
+        }, 
+        "cycle_time": 1, 
+        "name": "bfs-bulk", 
         "pipelining": 1
       }, 
       "memory_type": "spad", 
       "name": "selections_0", 
       "output_dir": "tmp", 
       "simulator": "aladdin", 
-      "source_dir": "test"
+      "source_dir": "test", 
+      "sweep_type": null
     }
   }, 
   {
@@ -117,42 +173,98 @@
         }, 
         "Function(\"aes256_encrypt_ecb\")": {
           "Loop(\"ecb1\")": {
-            "name": "ecb1"
+            "name": "ecb1", 
+            "unrolling": 4
           }, 
           "Loop(\"ecb2\")": {
-            "name": "ecb2"
+            "name": "ecb2", 
+            "unrolling": 2
           }, 
           "Loop(\"ecb3\")": {
-            "name": "ecb3"
+            "name": "ecb3", 
+            "unrolling": 4
           }, 
           "name": "aes256_encrypt_ecb"
         }, 
         "Function(\"aes_addRoundKey\")": {
           "Loop(\"addkey\")": {
-            "name": "addkey"
+            "name": "addkey", 
+            "unrolling": 2
           }, 
           "name": "aes_addRoundKey"
         }, 
         "Function(\"aes_addRoundKey_cpy\")": {
           "Loop(\"cpkey\")": {
-            "name": "cpkey"
+            "name": "cpkey", 
+            "unrolling": 2
           }, 
           "name": "aes_addRoundKey_cpy"
         }, 
         "Function(\"aes_subBytes\")": {
           "Loop(\"sub\")": {
-            "name": "sub"
+            "name": "sub", 
+            "unrolling": 2
           }, 
           "name": "aes_subBytes"
         }, 
+        "cycle_time": 1, 
         "name": "aes-aes", 
+        "pipelining": 1
+      }, 
+      "Benchmark(\"bfs-bulk\")": {
+        "Array(\"edges\")": {
+          "name": "edges", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 4096, 
+          "word_length": 8
+        }, 
+        "Array(\"level\")": {
+          "name": "level", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 256, 
+          "word_length": 1
+        }, 
+        "Array(\"level_counts\")": {
+          "name": "level_counts", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 10, 
+          "word_length": 8
+        }, 
+        "Array(\"nodes\")": {
+          "name": "nodes", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 512, 
+          "word_length": 8
+        }, 
+        "Function(\"bfs\")": {
+          "Loop(\"loop_horizons\")": {
+            "name": "loop_horizons", 
+            "unrolling": 2
+          }, 
+          "Loop(\"loop_neighbors\")": {
+            "name": "loop_neighbors", 
+            "unrolling": 2
+          }, 
+          "Loop(\"loop_nodes\")": {
+            "name": "loop_nodes", 
+            "unrolling": 2
+          }, 
+          "name": "bfs"
+        }, 
+        "cycle_time": 1, 
+        "name": "bfs-bulk", 
         "pipelining": 1
       }, 
       "memory_type": "spad", 
       "name": "selections_0", 
       "output_dir": "tmp", 
       "simulator": "aladdin", 
-      "source_dir": "test"
+      "source_dir": "test", 
+      "sweep_type": null
     }
   }, 
   {
@@ -195,42 +307,98 @@
         }, 
         "Function(\"aes256_encrypt_ecb\")": {
           "Loop(\"ecb1\")": {
-            "name": "ecb1"
+            "name": "ecb1", 
+            "unrolling": 8
           }, 
           "Loop(\"ecb2\")": {
-            "name": "ecb2"
+            "name": "ecb2", 
+            "unrolling": 3
           }, 
           "Loop(\"ecb3\")": {
-            "name": "ecb3"
+            "name": "ecb3", 
+            "unrolling": 8
           }, 
           "name": "aes256_encrypt_ecb"
         }, 
         "Function(\"aes_addRoundKey\")": {
           "Loop(\"addkey\")": {
-            "name": "addkey"
+            "name": "addkey", 
+            "unrolling": 4
           }, 
           "name": "aes_addRoundKey"
         }, 
         "Function(\"aes_addRoundKey_cpy\")": {
           "Loop(\"cpkey\")": {
-            "name": "cpkey"
+            "name": "cpkey", 
+            "unrolling": 4
           }, 
           "name": "aes_addRoundKey_cpy"
         }, 
         "Function(\"aes_subBytes\")": {
           "Loop(\"sub\")": {
-            "name": "sub"
+            "name": "sub", 
+            "unrolling": 4
           }, 
           "name": "aes_subBytes"
         }, 
+        "cycle_time": 1, 
         "name": "aes-aes", 
+        "pipelining": 1
+      }, 
+      "Benchmark(\"bfs-bulk\")": {
+        "Array(\"edges\")": {
+          "name": "edges", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 4096, 
+          "word_length": 8
+        }, 
+        "Array(\"level\")": {
+          "name": "level", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 256, 
+          "word_length": 1
+        }, 
+        "Array(\"level_counts\")": {
+          "name": "level_counts", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 10, 
+          "word_length": 8
+        }, 
+        "Array(\"nodes\")": {
+          "name": "nodes", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 512, 
+          "word_length": 8
+        }, 
+        "Function(\"bfs\")": {
+          "Loop(\"loop_horizons\")": {
+            "name": "loop_horizons", 
+            "unrolling": 4
+          }, 
+          "Loop(\"loop_neighbors\")": {
+            "name": "loop_neighbors", 
+            "unrolling": 4
+          }, 
+          "Loop(\"loop_nodes\")": {
+            "name": "loop_nodes", 
+            "unrolling": 4
+          }, 
+          "name": "bfs"
+        }, 
+        "cycle_time": 1, 
+        "name": "bfs-bulk", 
         "pipelining": 1
       }, 
       "memory_type": "spad", 
       "name": "selections_0", 
       "output_dir": "tmp", 
       "simulator": "aladdin", 
-      "source_dir": "test"
+      "source_dir": "test", 
+      "sweep_type": null
     }
   }
 ]
