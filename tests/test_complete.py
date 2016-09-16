@@ -18,7 +18,7 @@ class Common(object):
             os.path.join(TEST_DIR, self.testcase), test_mode=True, stream=f)
         interpreter.run()
 
-      output_name = os.path.join(EXPECTED_OUTPUT_DIR, self.testcase[:-6] + ".out")
+      output_name = os.path.join(EXPECTED_OUTPUT_DIR, self.testcase[:-3] + ".out")
       self.assertTrue(filecmp.cmp(TEST_FILE, output_name))
 
     def tearDown(self):
@@ -26,19 +26,19 @@ class Common(object):
 
 class SimpleSweepParam(Common.CompleteSweepTest):
   def setUp(self):
-    self.testcase = "single_sweep_param.xenon"
+    self.testcase = "single_sweep_param.xe"
 
 class MultiSweepParam(Common.CompleteSweepTest):
   def setUp(self):
-    self.testcase = "multi_sweep_param.xenon"
+    self.testcase = "multi_sweep_param.xe"
 
 class BigSweepParam(Common.CompleteSweepTest):
   def setUp(self):
-    self.testcase = "big_sweep_param.xenon"
+    self.testcase = "big_sweep_param.xe"
 
 class SelectionsSweep(Common.CompleteSweepTest):
   def setUp(self):
-    self.testcase = "sweep_with_selections.xenon"
+    self.testcase = "sweep_with_selections.xe"
 
 if __name__ == '__main__':
   unittest.main()
