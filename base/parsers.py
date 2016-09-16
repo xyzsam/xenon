@@ -111,7 +111,7 @@ def buildSetParser():
   set = "set" ident ["for" selection] value
   """
   selection = buildSelectionParser()
-  constant = Word(nums + ".").setResultsName("constant")
+  constant = Word(nums).setResultsName("constant")
   stringValue = string.setResultsName("string")
   expression = buildExpressionParser().setResultsName("expression")
   set_parser = (

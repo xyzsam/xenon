@@ -124,7 +124,7 @@ class SetCommand(Command):
     self.param = parse_result.param
     self.selection = SelectionCommand(lineno, line, parse_result)
     if len(parse_result.constant):
-      self.value = float(parse_result.constant)
+      self.value = int(parse_result.constant)
     elif len(parse_result.string):
       self.value = parse_result.string
     else:
