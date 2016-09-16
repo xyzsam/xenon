@@ -1,7 +1,6 @@
 import itertools
 import json
 import os
-import pprint
 import sys
 
 from xenon.base.datatypes import *
@@ -24,9 +23,11 @@ class SweepableView(XenonObj):
     # A list of attributes that we've copied from sweepable_obj.
     self.attrs = []
     # Copy the sweepable attributes from sweepable_obj.
-    for name, value in self.sweepable.getSweepableParamsAndValues().iteritems():
-      setattr(self, name, value)
-      self.attrs.append(name)
+    for name in self.sweepable.user_attrs:
+      value = getattr(self.sweepable, name)
+      if not isinstance(value, XenonObj):
+        setattr(self, name, value)
+        self.attrs.append(name)
     # Recursively copy all Sweepable children from sweepable_obj.
     for child_name, child in self.sweepable.iterattritems(objtype=Sweepable):
       setattr(self, child_name, SweepableView(child))
@@ -48,15 +49,15 @@ class SweepableView(XenonObj):
         # If this object has SweepableView children, then we want to identify
         # its type in the string.
         expanded_name = str(attr_value)
-        children[expanded_name] = attr_value.dictify()
+        children[expanded_name] = attr_value.dictify_recursive_()
       else:
         # Otherwise, this is just a plain variable, so just use attr_name.
         children[attr_name] = attr_value
     return children
 
   def __repr__(self):
-    return "{0}({1}(\"{2}\"))".format(
-        self.__class__.__name__, self.sweepable.__class__.__name__, self.sweepable.name)
+    return "{0}(\"{1}\")".format(
+        self.sweepable.__class__.__name__, self.sweepable.name)
 
 class ConfigSet(object):
   """ A wrapper for the set of configurations generated from a design sweep.
@@ -115,8 +116,8 @@ class ConfigGenerator(object):
   def applySweepParamValues(self, root_view, ids, indices):
     """ Recursively apply the values of the swept parameter ranges. """
     for param_id, param_idx in zip(ids, indices):
-      if param_id in root_view.sweepable.sweep_params_range:
-        param_value = root_view.sweepable.sweep_params_range[param_id][param_idx]
+      if param_id in root_view.sweepable.iterparamids():
+        param_value = root_view.sweepable.getSweepParamRange(param_id)[param_idx]
         param_name = root_view.sweepable.getParamName(param_id)
         setattr(root_view, param_name, param_value)
 
@@ -141,9 +142,7 @@ class ConfigGenerator(object):
     all_sweepable = recursiveSelect(self.sweep, objtype=Sweepable)
     range_len = {}
     for sweepable in all_sweepable:
-      if not hasattr(sweepable, "sweep_params_range"):
-        continue
-      for param_id, param_range in sweepable.sweep_params_range.iteritems():
+      for param_id, param_range in sweepable.iterparamitems():
         if param_id in range_len and range_len[param_id] != len(param_range):
             param_name = sweepable.getParamName(param_id)
             raise xe.XenonMismatchingRangeError(

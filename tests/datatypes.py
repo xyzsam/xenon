@@ -1,3 +1,5 @@
+# A set of simple datatypes for testing.
+
 from xenon.base.datatypes import Sweepable
 
 import params as params

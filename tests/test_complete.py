@@ -3,6 +3,7 @@
 import filecmp
 import json
 import os
+import shutil
 import unittest
 
 from xenon.xenon_interpreter import XenonInterpreter
@@ -28,8 +29,8 @@ class Common(object):
       self.assertEqual(expected, output)
 
     def tearDown(self):
-      for genfile in self.genfiles:
-        os.remove(genfile)
+      output_dir = os.path.dirname(self.genfiles[0])
+      shutil.rmtree(output_dir)
 
 class SimpleSweepParam(Common.CompleteSweepTest):
   def setUp(self):
