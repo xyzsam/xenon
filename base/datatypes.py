@@ -7,8 +7,8 @@ from xenon.base.parsers import *
 import xenon.base.exceptions as xe
 
 class XenonObj(object):
-
   """ Base class for any object defined by the Xenon system. """
+
   def __init__(self):
     pass
 
@@ -62,7 +62,7 @@ class Param(XenonObj):
     if type(self) == type(other):
       return self.id == other.id
     elif isinstance(other, str):
-      # This is used by the BaseSweepable.setSweepParameter function.
+      # This is used by the Sweepable.setSweepParameter function.
       return self.name == other
     return False
 
@@ -75,15 +75,39 @@ class Param(XenonObj):
   def __repr__(self):
     return "{0}(\"{1}\",{2})".format(self.__class__.__name__, self.name, self.default)
 
-class BaseSweepable(XenonObj):
-  """ Base class for any object with parameters that can be swept. """
+class Sweepable(XenonObj):
+  """ Base class for any object with parameters that can be swept.
+
+  User-defined classes for sweepable objects should subclass this and define
+  sweepable_params and other attributes that need to appear in the output JSON.
+
+  Sweepable will mark certain user-added attributes that user classes have
+  added as attributes whose values must appear in the output JSON.  User
+  attributes are tracked in a set called "user_attrs". Only built-in types are
+  tracked by this set; user-defined classes are ignored. Also, any attribute
+  beginning or ending with "_" is ignored; this lets users implement private
+  variables without having them appear in the generated output.
+
+  TODO: Expand this documentation.
+  1. Explain when parameters should be initialized to None.
+  2. Explain how attributes are handled.
+  3. Distiguish sweepable_params from sweep_params_range_.
+  4. Remind users never to inherit from Sweepable.
+  """
   # A list of sweepable parameters for this class.
   # TODO: If we want to sweep parameters of the same name independently, that
   # would be a per-instance difference, so this should be part of the instance.
   sweepable_params = []
 
+  builtins_ = [IntType, FloatType, StringType, DictType, ListType, NoneType,
+               BooleanType, LongType, ComplexType, TupleType, UnicodeType]
+
   def __init__(self, name):
-    super(BaseSweepable, self).__init__()
+    # We must add the user_attrs attribute before calling the super
+    # constructor, since the super constructor will also eventually call
+    # __setattr__, which expects the presence of user_attrs.
+    self.user_attrs = set()
+    super(Sweepable, self).__init__()
     self.name = name
 
     # Automatically generated mapping to/from Param name and id.
@@ -97,6 +121,14 @@ class BaseSweepable(XenonObj):
     # immediately expanded into a Python list).
     self.sweep_params_range_ = {}
     self.createSweepAttributes()
+
+  def __setattr__(self, attr, value):
+    self.__dict__[attr] = value
+    if (type(value) in Sweepable.builtins_ and
+        not attr.startswith("_") and
+        not attr.endswith("_") and
+        not attr == "user_attrs"):
+      self.user_attrs.add(attr)
 
   def createSweepAttributes(self):
     """ Create an attribute for each parameter in sweepable_params. """
@@ -208,8 +240,8 @@ class BaseSweepable(XenonObj):
         set_params[param] = self.getSweepParamRange(param)
     output = set_params
 
-    # Now, repeat for each BaseSweepable attribute.
-    attrs = self.iterattrkeys(objtype=BaseSweepable)
+    # Now, repeat for each Sweepable attribute.
+    attrs = self.iterattrkeys(objtype=Sweepable)
     for attr in attrs:
       output[attr] = getattr(self, attr).dictify()
     return {key: output}
@@ -219,39 +251,6 @@ class BaseSweepable(XenonObj):
 
   def __repr__(self):
     return "{0}(name=\"{1}\",id={2})".format(self.__class__.__name__, self.name, self.id)
-
-class Sweepable(BaseSweepable):
-  """ Public Sweepable interface.
-
-  All user objects that need to be swept should inherit from Sweepable (and not
-  BaseSweepable). This is because Sweepable will track certain attributes that
-  user objects have added on top of BaseSweepable. This allows the Xenon
-  system to distinguish between internal attributes and attributes that should
-  appear in any generated output files.
-
-  User attributes are tracked in a set called "user_attrs". Only built-in types
-  are tracked by this set; user-defined classes are ignored. Also, any
-  attribute beginning or ending with "_" is ignored; this lets users implement
-  private variables without having them appear in the generated output.
-  """
-
-  builtins_ = [IntType, FloatType, StringType, DictType, ListType,
-               BooleanType, LongType, ComplexType, TupleType, UnicodeType]
-
-  def __init__(self, name):
-    # We must add the user_attrs attribute before calling the super
-    # constructor, since the super constructor will also eventually call
-    # __setattr__, which expects the presence of user_attrs.
-    self.user_attrs = set()
-    super(Sweepable, self).__init__(name)
-
-  def __setattr__(self, attr, value):
-    self.__dict__[attr] = value
-    if (type(value) in Sweepable.builtins_ and
-        not attr.startswith("_") and
-        not attr.endswith("_") and
-        not attr == "user_attrs"):
-      self.user_attrs.add(attr)
 
 class DesignSweep(Sweepable):
   sweepable_params = []

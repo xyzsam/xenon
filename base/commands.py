@@ -3,7 +3,7 @@ import copy
 import importlib
 import pyparsing as pp
 
-from xenon.base.datatypes import XenonObj, BaseSweepable, Sweepable
+from xenon.base.datatypes import XenonObj, Sweepable
 from xenon.base.exceptions import *
 from xenon.base.expressions import Expression
 from xenon.base.parsers import *
@@ -155,7 +155,7 @@ class SetCommand(Command):
         setattr(obj, self.param, value)
         # Remove this parameter from obj.sweep_params_range, if it exists, so that
         # the sweep generator does not ignore this value.
-        if isinstance(obj, BaseSweepable) and obj.hasSweepParamRange(self.param):
+        if isinstance(obj, Sweepable) and obj.hasSweepParamRange(self.param):
           obj.removeFromSweepParamRange(self.param)
         is_applied = True
 
