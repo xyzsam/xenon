@@ -31,19 +31,19 @@ class SweepableView(XenonObj):
       self.attrs.append(child_name)
 
   def dump(self, stream=sys.stdout):
-    dictified = self.dictify()
+    top_attr = str(self)
+    dictified = {top_attr: self.dictify()}
     printer = pprint.PrettyPrinter(indent=2, stream=stream)
     printer.pprint(dictified)
 
   def dictify(self):
-    key = str(self)
     children = {}
     for attr_name in self.attrs:
       attr_value = getattr(self, attr_name)
       if isinstance(attr_value, SweepableView):
         # If this object has SweepableView children, then we want to identify
-        # its type through the string.
-        expanded_name = str(getattr(self.sweepable, attr_name))
+        # its type in the string.
+        expanded_name = str(attr_value)
         children[expanded_name] = attr_value.dictify()
       else:
         # Otherwise, this is just a plain variable, so just use attr_name.
