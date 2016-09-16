@@ -24,8 +24,6 @@ class Common(object):
         expected = json.load(e)
       with open(self.genfiles[0], "r") as o:
         output = json.load(o)
-      # TODO: This might be too fragile, since these are lists, so equality is
-      # order dependent.
       self.assertEqual(expected, output)
 
     def tearDown(self):

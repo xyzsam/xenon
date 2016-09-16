@@ -34,7 +34,7 @@ class BeginAndEndCommands(CommandTestCase):
     self.assertEqual(self.sweep.sweep_type, None)
 
     self.executeCommand("end sweep")
-    self.assertEqual(self.sweep.done, True)
+    self.assertTrue(self.sweep.isDone())
 
 class UseCommand(CommandTestCase):
   def runTest(self):
