@@ -1,11 +1,11 @@
-begin sweep mysweep
+begin sweep big
 
 use xenon.tests.machsuite
 
 generate configs
 
 # Set parameters.
-set output_dir "test"
+set output_dir "tmp"
 set source_dir "test"
 set simulator "aladdin"
 set memory_type "spad"

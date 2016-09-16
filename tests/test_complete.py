@@ -1,6 +1,7 @@
 # End-to-end tests.
 
 import filecmp
+import json
 import os
 import unittest
 
@@ -13,16 +14,22 @@ TEST_FILE = "test.out"
 class Common(object):
   class CompleteSweepTest(unittest.TestCase):
     def runTest(self):
-      with open(TEST_FILE, "w") as f:
-        interpreter = XenonInterpreter(
-            os.path.join(TEST_DIR, self.testcase), test_mode=True, stream=f)
-        interpreter.run()
+      self.genfiles = []
+      interpreter = XenonInterpreter(os.path.join(TEST_DIR, self.testcase))
+      self.genfiles = interpreter.run()
 
-      output_name = os.path.join(EXPECTED_OUTPUT_DIR, self.testcase[:-3] + ".out")
-      self.assertTrue(filecmp.cmp(TEST_FILE, output_name))
+      expected_fname = os.path.join(EXPECTED_OUTPUT_DIR, os.path.basename(self.genfiles[0]))
+      with open(expected_fname, "r") as e:
+        expected = json.load(e)
+      with open(self.genfiles[0], "r") as o:
+        output = json.load(o)
+      # TODO: This might be too fragile, since these are lists, so equality is
+      # order dependent.
+      self.assertEqual(expected, output)
 
     def tearDown(self):
-      os.remove(TEST_FILE)
+      for genfile in self.genfiles:
+        os.remove(genfile)
 
 class SimpleSweepParam(Common.CompleteSweepTest):
   def setUp(self):
@@ -36,9 +43,17 @@ class BigSweepParam(Common.CompleteSweepTest):
   def setUp(self):
     self.testcase = "big_sweep_param.xe"
 
-class SelectionsSweep(Common.CompleteSweepTest):
+class SelectionsSweep0(Common.CompleteSweepTest):
   def setUp(self):
-    self.testcase = "sweep_with_selections.xe"
+    self.testcase = "sweep_with_selections_0.xe"
+
+class SelectionsSweep1(Common.CompleteSweepTest):
+  def setUp(self):
+    self.testcase = "sweep_with_selections_1.xe"
+
+class SelectionsSweep2(Common.CompleteSweepTest):
+  def setUp(self):
+    self.testcase = "sweep_with_selections_2.xe"
 
 if __name__ == '__main__':
   unittest.main()

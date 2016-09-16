@@ -1,4 +1,7 @@
-begin sweep multi
+# We put more selective sweep command before the global one.  The global one
+# should override the more selective one.
+
+begin sweep selections_1
 
 use xenon.tests.machsuite
 
@@ -13,7 +16,8 @@ set memory_type "spad"
 set pipelining 1
 set partition_type "cyclic"
 set partition_type for aes_aes.k "block"
+sweep unrolling for aes_aes.aes256_encrypt_ecb.* from 2 to 8 expstep 2
+sweep unrolling for aes_aes.aes256_encrypt_ecb.ecb2 from 1 to 3 linstep 1
 sweep unrolling for ** from 1 to 4 expstep 2
-sweep partition_factor for ** from 2 to 16 expstep 2
 
 end sweep

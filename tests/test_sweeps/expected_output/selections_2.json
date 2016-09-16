@@ -1,0 +1,164 @@
+[
+  {
+    "SweepableView(DesignSweep(\"selections_2\"))": {
+      "SweepableView(Benchmark(\"aes-aes\"))": {
+        "SweepableView(Array(\"buf\"))": {
+          "partition_factor": 1, 
+          "partition_type": "cyclic"
+        }, 
+        "SweepableView(Array(\"ctx\"))": {
+          "partition_factor": 1, 
+          "partition_type": "cyclic"
+        }, 
+        "SweepableView(Array(\"k\"))": {
+          "partition_factor": 1, 
+          "partition_type": "block"
+        }, 
+        "SweepableView(Array(\"rcon\"))": {
+          "partition_factor": 1, 
+          "partition_type": "cyclic"
+        }, 
+        "SweepableView(Array(\"sbox\"))": {
+          "partition_factor": 1, 
+          "partition_type": "cyclic"
+        }, 
+        "SweepableView(Function(\"aes256_encrypt_ecb\"))": {
+          "SweepableView(Loop(\"ecb1\"))": {
+            "unrolling": 1
+          }, 
+          "SweepableView(Loop(\"ecb2\"))": {
+            "unrolling": 10
+          }, 
+          "SweepableView(Loop(\"ecb3\"))": {
+            "unrolling": 1
+          }
+        }, 
+        "SweepableView(Function(\"aes_addRoundKey\"))": {
+          "SweepableView(Loop(\"addkey\"))": {
+            "unrolling": 1
+          }
+        }, 
+        "SweepableView(Function(\"aes_addRoundKey_cpy\"))": {
+          "SweepableView(Loop(\"cpkey\"))": {
+            "unrolling": 1
+          }
+        }, 
+        "SweepableView(Function(\"aes_subBytes\"))": {
+          "SweepableView(Loop(\"sub\"))": {
+            "unrolling": 12
+          }
+        }, 
+        "cycle_time": 1, 
+        "pipelining": 1
+      }
+    }
+  }, 
+  {
+    "SweepableView(DesignSweep(\"selections_2\"))": {
+      "SweepableView(Benchmark(\"aes-aes\"))": {
+        "SweepableView(Array(\"buf\"))": {
+          "partition_factor": 1, 
+          "partition_type": "cyclic"
+        }, 
+        "SweepableView(Array(\"ctx\"))": {
+          "partition_factor": 1, 
+          "partition_type": "cyclic"
+        }, 
+        "SweepableView(Array(\"k\"))": {
+          "partition_factor": 1, 
+          "partition_type": "block"
+        }, 
+        "SweepableView(Array(\"rcon\"))": {
+          "partition_factor": 1, 
+          "partition_type": "cyclic"
+        }, 
+        "SweepableView(Array(\"sbox\"))": {
+          "partition_factor": 1, 
+          "partition_type": "cyclic"
+        }, 
+        "SweepableView(Function(\"aes256_encrypt_ecb\"))": {
+          "SweepableView(Loop(\"ecb1\"))": {
+            "unrolling": 2
+          }, 
+          "SweepableView(Loop(\"ecb2\"))": {
+            "unrolling": 10
+          }, 
+          "SweepableView(Loop(\"ecb3\"))": {
+            "unrolling": 2
+          }
+        }, 
+        "SweepableView(Function(\"aes_addRoundKey\"))": {
+          "SweepableView(Loop(\"addkey\"))": {
+            "unrolling": 2
+          }
+        }, 
+        "SweepableView(Function(\"aes_addRoundKey_cpy\"))": {
+          "SweepableView(Loop(\"cpkey\"))": {
+            "unrolling": 2
+          }
+        }, 
+        "SweepableView(Function(\"aes_subBytes\"))": {
+          "SweepableView(Loop(\"sub\"))": {
+            "unrolling": 12
+          }
+        }, 
+        "cycle_time": 1, 
+        "pipelining": 1
+      }
+    }
+  }, 
+  {
+    "SweepableView(DesignSweep(\"selections_2\"))": {
+      "SweepableView(Benchmark(\"aes-aes\"))": {
+        "SweepableView(Array(\"buf\"))": {
+          "partition_factor": 1, 
+          "partition_type": "cyclic"
+        }, 
+        "SweepableView(Array(\"ctx\"))": {
+          "partition_factor": 1, 
+          "partition_type": "cyclic"
+        }, 
+        "SweepableView(Array(\"k\"))": {
+          "partition_factor": 1, 
+          "partition_type": "block"
+        }, 
+        "SweepableView(Array(\"rcon\"))": {
+          "partition_factor": 1, 
+          "partition_type": "cyclic"
+        }, 
+        "SweepableView(Array(\"sbox\"))": {
+          "partition_factor": 1, 
+          "partition_type": "cyclic"
+        }, 
+        "SweepableView(Function(\"aes256_encrypt_ecb\"))": {
+          "SweepableView(Loop(\"ecb1\"))": {
+            "unrolling": 4
+          }, 
+          "SweepableView(Loop(\"ecb2\"))": {
+            "unrolling": 10
+          }, 
+          "SweepableView(Loop(\"ecb3\"))": {
+            "unrolling": 4
+          }
+        }, 
+        "SweepableView(Function(\"aes_addRoundKey\"))": {
+          "SweepableView(Loop(\"addkey\"))": {
+            "unrolling": 4
+          }
+        }, 
+        "SweepableView(Function(\"aes_addRoundKey_cpy\"))": {
+          "SweepableView(Loop(\"cpkey\"))": {
+            "unrolling": 4
+          }
+        }, 
+        "SweepableView(Function(\"aes_subBytes\"))": {
+          "SweepableView(Loop(\"sub\"))": {
+            "unrolling": 12
+          }
+        }, 
+        "cycle_time": 1, 
+        "pipelining": 1
+      }
+    }
+  }
+]

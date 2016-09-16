@@ -1,15 +1,15 @@
+import itertools
 import math
 import pprint
-import uuid
 
 from xenon.base.parsers import *
 import xenon.base.exceptions as xe
 
 class XenonObj(object):
+
   """ Base class for any object defined by the Xenon system. """
   def __init__(self):
-    # Unique identifier for all Xenon objects.
-    self.id = uuid.uuid1().int % 1000000
+    pass
 
   def iterattrkeys(self, objtype=object):
     """ Analogue of dict.iterkeys() over attributes, with filtering. """
@@ -42,8 +42,17 @@ class Param(XenonObj):
   TODO: This needs to be clarified - parameters in different objects with the
   same id can have diferent values; they will just be swept jointly.
   """
+  # Monotonically increasing id for all newly created Params.
+  #
+  # We use this instead of a random id so that we can guarantee stability in
+  # generated configs; that is, as long as the Xenon input file does not
+  # change, then we should generate the exact same configurations in the exact
+  # same order every time. This greatly simplifies testing.
+  next_id_ = itertools.count().next
+
   def __init__(self, name, default):
     super(Param, self).__init__()
+    self.id = Param.next_id_()
     self.name = name
     self.default = default
 
@@ -95,6 +104,8 @@ class Sweepable(XenonObj):
       # object's parents from values that were specifically set on this object
       # by the user.
       setattr(self, param.name, None)
+      # TODO: This is a BUG that would result from having independent
+      # parameters with the same name but different ids!
       self.sweepable_params_dict_[param.name] = param.id
       self.sweepable_params_dict_[param.id] = param.name
 

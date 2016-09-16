@@ -46,3 +46,8 @@ class XenonMismatchingRangeError(XenonError):
     self.param_name = param_name
     self.this_length = this_length
     self.prev_length = prev_length
+
+class DuplicateSweepNameError(XenonError):
+  def __init__(self, sweep_name):
+    super(DuplicateSweepNameError, self).__init__(
+        "%s was already declared as the name of another sweep." % sweep_name)

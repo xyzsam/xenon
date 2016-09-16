@@ -1,4 +1,6 @@
 import itertools
+import json
+import os
 import pprint
 import sys
 
@@ -31,12 +33,14 @@ class SweepableView(XenonObj):
       self.attrs.append(child_name)
 
   def dump(self, stream=sys.stdout):
-    top_attr = str(self)
-    dictified = {top_attr: self.dictify()}
-    printer = pprint.PrettyPrinter(indent=2, stream=stream)
-    printer.pprint(dictified)
+    dictified = self.dictify()
+    json.dump(dictified, stream, sort_keys=True, indent=2)
 
   def dictify(self):
+    top_attr = str(self)
+    return {top_attr: self.dictify_recursive_()}
+
+  def dictify_recursive_(self):
     children = {}
     for attr_name in self.attrs:
       attr_value = getattr(self, attr_name)
@@ -54,9 +58,37 @@ class SweepableView(XenonObj):
     return "{0}({1}(\"{2}\"))".format(
         self.__class__.__name__, self.sweepable.__class__.__name__, self.sweepable.name)
 
+class ConfigSet(object):
+  """ A wrapper for the set of configurations generated from a design sweep.
+
+  The only purpose of this class is to dump the complete list of configurations
+  as a valid JSON file.
+  """
+  def __init__(self, configs):
+    self.configs = configs
+
+  def dump(self, stream=sys.stdout):
+    json_repr = [config.dictify() for config in self.configs]
+    json.dump(json_repr, stream, sort_keys=True, indent=2)
+
 class ConfigGenerator(object):
   def __init__(self, configured_sweep):
     self.sweep = configured_sweep
+
+  def run(self):
+    """ Generate and dump output.
+
+    Returns the list of files generated.
+    """
+    config_set = self.generate()
+    generated_files = []
+    if not os.path.exists(self.sweep.output_dir):
+      os.makedirs(self.sweep.output_dir)
+    output_file_name = os.path.join(self.sweep.output_dir, "%s.json" % self.sweep.name)
+    with open(output_file_name, "w") as f:
+      config_set.dump(f)
+      generated_files.append(output_file_name)
+    return generated_files
 
   def generate(self):
     """ Generate all configurations of this sweep. """
@@ -78,7 +110,7 @@ class ConfigGenerator(object):
       self.applyDefaultParamValues(top_view)
       generated_configs.append(top_view)
 
-    return generated_configs
+    return ConfigSet(generated_configs)
 
   def applySweepParamValues(self, root_view, ids, indices):
     """ Recursively apply the values of the swept parameter ranges. """

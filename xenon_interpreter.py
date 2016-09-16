@@ -27,15 +27,14 @@ class XenonInterpreter():
   This result can be accessible through the XenonInterpreter.configured_sweep
   attribute.
   """
-  def __init__(self, filename, test_mode=False, stream=sys.stdout):
+  def __init__(self, filename, test_mode=False):
     self.filename = filename
     # List of (line_number, ParseResult) tuples.
     self.commands_ = []
     # Parser object for the complete line.
     self.line_parser_ = buildCommandParser()
-    self.test_mode = test_mode
-    # Where to print debugging information.
-    self.stream = stream
+    # All the sweeps that have been configured, but not yet expanded.
+    self.configured_sweeps = {}
 
   def handleXenonCommandError(self, command, err):
     msg = "On line %d: %s\n" % (command.lineno, command.line)
@@ -108,29 +107,34 @@ class XenonInterpreter():
         if DEBUG:
           self.stream.write("Configured sweep:\n")
           current_sweep.dump(stream=self.stream)
-        self.generate_outputs(current_sweep)
+        if current_sweep.name in self.configured_sweeps:
+          raise xe.DuplicateSweepNameError(current_sweep.name)
+        else:
+          # TODO: Validate the sweep first.
+          self.configured_sweeps[current_sweep.name] = current_sweep
         current_sweep = DesignSweep()
 
-  def generate_outputs(self, sweep):
-    for output in sweep.generate_outputs:
-      generator_module = self.get_generator_module(output)
-      try:
-        generator = generator_module.get_generator(sweep)
-      except AttributeError as e:
-        self.handleGeneratorError(output, e)
-
-      try:
-        generated_configs = generator.generate()
-      except xe.XenonError as e:
-        self.handleConfigGeneratorError(output, e)
-
-      if self.test_mode:
-        for config in generated_configs:
-          config.dump(stream=self.stream)
+  def generate_outputs(self):
+    all_generated_files = []
+    for sweep in self.configured_sweeps.itervalues():
+      for output in sweep.generate_outputs:
+        generator_module = self.get_generator_module(output)
+        try:
+          generator = generator_module.get_generator(sweep)
+        except AttributeError as e:
+          self.handleGeneratorError(output, e)
+        try:
+          generated_files = generator.run()
+        except xe.XenonError as e:
+          self.handleGeneratorError(output, e)
+        all_generated_files.extend(generated_files)
+    return all_generated_files
 
   def run(self):
     self.parse()
     self.execute()
+    genfiles = self.generate_outputs()
+    return genfiles
 
   def get_generator_module(self, generate_target):
     """ Returns the module named generator_[generate_target].
@@ -149,12 +153,11 @@ def main():
   parser = argparse.ArgumentParser()
   parser.add_argument("xenon_file", help="Xenon input file.")
   parser.add_argument("-d", "--debug", action="store_true", help="Turn on debugging output.")
-  parser.add_argument("-t", "--test", action="store_true", help="Testing mode.")
   args = parser.parse_args()
 
   global DEBUG
   DEBUG = args.debug
-  interpreter = XenonInterpreter(args.xenon_file, test_mode=args.test)
+  interpreter = XenonInterpreter(args.xenon_file)
   interpreter.run()
 
 if __name__ == "__main__":
