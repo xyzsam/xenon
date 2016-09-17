@@ -139,12 +139,23 @@ class XenonInterpreter():
   def get_generator_module(self, generate_target):
     """ Returns the module named generator_[generate_target].
 
-    This module must be under xenon.generators. If such a module does not
+    This function will search for this module name under the packages
+    xenon.generators and *.generators, where * is the top level package
+    from where the interpreter is being executed.  If such a module does not
     exist, then None is returned.
+
+    See xenon.generators for a description of what interface the generator must
+    implement.
     """
-    module_name = "generator_%s" % generate_target
+    module_name = "generators.generator_%s" % generate_target
     try:
-      module = importlib.import_module(".".join(["xenon", "generators", module_name]))
+      module = importlib.import_module(".".join(["xenon", module_name]))
+      return module
+    except ImportError as e:
+      pass
+
+    try:
+      module = importlib.import_module(module_name)
     except ImportError as e:
       self.handleGeneratorError(generate_target, e)
     return module
