@@ -1,4 +1,4 @@
-begin sweep single
+begin ExhaustiveSweep single
 
 use xenon.tests.machsuite
 
@@ -6,11 +6,8 @@ generate configs
 
 # Set parameters.
 set output_dir "tmp" # A comment
-set source_dir "test"
-set simulator "aladdin"
-set memory_type "spad"
 
 # Only sweep this variable.
 sweep cycle_time from 1 to 5
 
-end sweep
+end single

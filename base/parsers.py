@@ -67,11 +67,18 @@ buildKeywords()
 def buildBeginParser():
   # Sweep names must begin with letters.
   sweepname = ident.setResultsName("sweep_name")
-  begin_statement = reserved[CMD_BEGIN] + reserved[CMD_SWEEP] + sweepname + comment + EOL
+  sweepclass = ident.setResultsName("sweep_class")
+  begin_statement = reserved[CMD_BEGIN] + sweepclass + sweepname + comment + EOL
   return begin_statement
 
 def buildEndParser():
-  end_statement = reserved["end"] + reserved["sweep"] + comment + EOL
+  """ The end command is defined by the following BNF:
+
+  sweepname = ident
+  end = "end" + sweepname
+  """
+  sweepname = ident.setResultsName("sweep_name")
+  end_statement = reserved["end"] + sweepname + comment + EOL
   return end_statement
 
 def buildGenerateParser():

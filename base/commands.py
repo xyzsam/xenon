@@ -2,25 +2,27 @@ import abc
 import copy
 import importlib
 import pyparsing as pp
+from pydoc import locate
 
+# TODO: More DesignSweep types by default?
 from xenon.base.datatypes import XenonObj, Sweepable
 from xenon.base.exceptions import *
 from xenon.base.expressions import Expression
 from xenon.base.parsers import *
+import xenon.base.common as common
+import xenon.base.globalscope as g
 
-def recursiveSelect(root, objtype=object):
-  """ Recursively selects all attributes of type objtype from root.  """
-  if not isinstance(root, objtype):
-    print type(root)
-  assert(isinstance(root, objtype))
-  selected_objs = []
-  for obj in root.iterattrvalues(objtype=objtype):
-    # Safety check to avoid infinite recursion.
-    if obj == root:
-      continue
-    selected_objs.append(obj)
-    selected_objs.extend(recursiveSelect(obj, objtype=objtype))
-  return selected_objs
+# def recursiveSelect(root, objtype=object):
+#   """ Recursively selects all attributes of type objtype from root. """
+#   assert(isinstance(root, objtype))
+#   selected_objs = []
+#   for obj in root.iterattrvalues(objtype=objtype):
+#     # Safety check to avoid infinite recursion.
+#     if obj == root:
+#       continue
+#     selected_objs.append(obj)
+#     selected_objs.extend(recursiveSelect(obj, objtype=objtype))
+#   return selected_objs
 
 class Command(XenonObj):
   """ Commands describe an action to perform on a sweep.
@@ -88,7 +90,7 @@ class SelectionCommand(Command):
     if token == LIT_STAR:
       selected_objs = [v for v in current_view.iterattrvalues(objtype=XenonObj)]
     elif token == LIT_STARSTAR:
-      selected_objs = recursiveSelect(current_view, objtype=XenonObj)
+      selected_objs = common.recursiveSelect(current_view, objtype=XenonObj)
     # Remember: * and ** return not just all the children of the current view,
     # but the current view itself.
     selected_objs.extend([current_view])
@@ -102,10 +104,37 @@ class BeginCommand(Command):
     """ Begin command specifies sweep name and sweep type. """
     super(BeginCommand, self).__init__(lineno, line, parse_result)
     self.name = parse_result.sweep_name
-    self.sweep_type = None  # TODO: Implement this later.
+    self.sweep_class_name = parse_result.sweep_class
+
+  def findSweepClassType(self):
+    """ Return the type by the name sweep_class_name.
+
+    Search in either xenon.base.datatypes or in Xenon global scope.
+
+    Returns:
+      A type of type BaseDesignSweep if found, None otherwise.
+    """
+    internal_path = "xenon.base.designsweeptypes.%s" % self.sweep_class_name
+    SweepClassType = locate(internal_path)
+    if SweepClassType:
+      return SweepClassType
+    global_path = "xenon.base.globalscope.scope.%s" % self.sweep_class_name
+    SweepClassType = locate(global_path)
+    if SweepClassType:
+      return SweepClassType
+    return None
 
   def execute(self, sweep_obj):
-    sweep_obj.initializeSweep(self.name, self.sweep_type)
+    # TODO: START HERE>
+    # Begin must now construct a new DesignSweep object using globals!
+    assert(sweep_obj == None)
+    # Try to construct this sweep object from local scope.
+    SweepClassType = self.findSweepClassType()
+    if not SweepClassType:
+      raise XenonUnknownSweepTypeError(self.sweep_class_name)
+    sweep_obj = SweepClassType(self.name)
+    sweep_obj.initializeSweep(self.name)
+    return sweep_obj
 
 class EndCommand(Command):
   def __init__(self, lineno, line, parse_result):
@@ -114,6 +143,7 @@ class EndCommand(Command):
 
   def execute(self, sweep_obj):
     sweep_obj.endSweep()
+    return sweep_obj
 
 class SetCommand(Command):
   def __init__(self, lineno, line, parse_result):
@@ -164,6 +194,7 @@ class SetCommand(Command):
 
   def execute(self, sweep_obj):
     self.setParam(sweep_obj)
+    return sweep_obj
 
 class UseCommand(Command):
   def __init__(self, lineno, line, parse_result):
@@ -171,6 +202,7 @@ class UseCommand(Command):
     self.package_path = list(parse_result.package_path)
 
   def execute(self, sweep_obj):
+    target_obj = sweep_obj if sweep_obj else g.scope
     package_path_str = ".".join(self.package_path)
     try:
       package = importlib.import_module(package_path_str)
@@ -179,12 +211,13 @@ class UseCommand(Command):
       if path_terminator == "*":
         # Import everything into the global namespace.
         for attr, val in package.__dict__.iteritems():
-          if isinstance(val, XenonObj):
-            sweep_obj.__dict__[attr] = copy.deepcopy(val)
+          if isinstance(val, XenonObj) or isinstance(val, type):
+            target_obj.__dict__[attr] = copy.deepcopy(val)
       else:
-        sweep_obj.__dict__[path_terminator] = package
+        target_obj.__dict__[path_terminator] = package
     except ImportError as e:
       raise XenonImportError(self.package_path, e)
+    return sweep_obj
 
 class GenerateCommand(Command):
   def __init__(self, lineno, line, parse_result):
@@ -193,6 +226,7 @@ class GenerateCommand(Command):
 
   def execute(self, sweep_obj):
     sweep_obj.addGenerateOutput(self.target)
+    return sweep_obj
 
 class SweepCommand(Command):
   def __init__(self, lineno, line, parse_result):
@@ -217,3 +251,4 @@ class SweepCommand(Command):
 
     if not is_applied_at_least_once:
       raise XenonAttributeError(self.sweep_param)
+    return sweep_obj

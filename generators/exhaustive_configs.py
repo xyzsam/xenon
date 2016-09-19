@@ -3,8 +3,8 @@ import json
 import os
 import sys
 
+import xenon.base.common as common
 from xenon.base.datatypes import *
-from xenon.base.commands import recursiveSelect
 import xenon.base.exceptions as xe
 
 class SweepableView(XenonObj):
@@ -139,7 +139,7 @@ class ConfigGenerator(object):
     TODO: Fix documentation.
     """
     # Get all the sweepable objects.
-    all_sweepable = recursiveSelect(self.sweep, objtype=Sweepable)
+    all_sweepable = common.recursiveSelect(self.sweep, objtype=Sweepable)
     range_len = {}
     for sweepable in all_sweepable:
       for param_id, param_range in sweepable.iterparamitems():
@@ -151,6 +151,3 @@ class ConfigGenerator(object):
           range_len[param_id] = len(param_range)
 
     return range_len
-
-def get_generator(configured_sweep):
-  return ConfigGenerator(configured_sweep)

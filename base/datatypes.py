@@ -252,24 +252,19 @@ class Sweepable(XenonObj):
   def __repr__(self):
     return "{0}(name=\"{1}\",id={2})".format(self.__class__.__name__, self.name, self.id)
 
-class DesignSweep(Sweepable):
+class BaseDesignSweep(Sweepable):
   sweepable_params = []
 
-  def __init__(self, name=None, sweep_type=None):
-    super(DesignSweep, self).__init__(name)
-    self.sweep_type = sweep_type  # TODO Support different sweep types.
+  def __init__(self, name=None):
+    super(BaseDesignSweep, self).__init__(name)
     self.generate_outputs = set()
     self.done_ = False
 
     # Global settings about this sweep.
     self.output_dir = ""
-    self.source_dir = ""
-    self.memory_type = ""
-    self.simulator = ""
 
-  def initializeSweep(self, name, sweep_type):
+  def initializeSweep(self, name):
     self.name = name
-    self.sweep_type = sweep_type
 
   def endSweep(self):
     self.checkInitializedAndRaise_()
@@ -286,5 +281,16 @@ class DesignSweep(Sweepable):
     if self.name == None:
       raise xe.SweepNotInitializedError()
 
+  def generateAllOutputs(self):
+    all_genfiles = []
+    for output in self.generate_outputs:
+      func_name = "generate_%s" % output
+      generator = getattr(self, func_name)
+      genfiles = generator()
+      all_genfiles.extend(genfiles)
+
+    return all_genfiles
+
   def __repr__(self):
-    return "{0}(\"{1}\",{2})".format(self.__class__.__name__, self.name, self.sweep_type)
+    return "{0}(\"{1}\")".format(self.__class__.__name__, self.name)
+

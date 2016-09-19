@@ -1,3 +1,3 @@
 __all__ = [
-    "generator_configs",
+    "exhaustive_configs",
 ]

@@ -1,7 +1,7 @@
 # We put more selective sweep command before the global one.  The global one
 # should override the more selective one.
 
-begin sweep selections_1
+begin ExhaustiveSweep selections_1
 
 use xenon.tests.machsuite
 
@@ -9,9 +9,6 @@ generate configs
 
 # Set parameters.
 set output_dir "tmp"
-set source_dir "test"
-set simulator "aladdin"
-set memory_type "spad"
 
 set pipelining 1
 set partition_type "cyclic"
@@ -20,4 +17,4 @@ sweep unrolling for aes_aes.aes256_encrypt_ecb.* from 2 to 8 expstep 2
 sweep unrolling for aes_aes.aes256_encrypt_ecb.ecb2 from 1 to 3 linstep 1
 sweep unrolling for ** from 1 to 4 expstep 2
 
-end sweep
+end selections_1

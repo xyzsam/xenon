@@ -26,8 +26,9 @@ class Common(object):
       self.assertEqual(expected, output)
 
     def tearDown(self):
-      output_dir = os.path.dirname(self.genfiles[0])
-      shutil.rmtree(output_dir)
+      if len(self.genfiles):
+        output_dir = os.path.dirname(self.genfiles[0])
+        shutil.rmtree(output_dir)
 
 class SimpleSweepParam(Common.CompleteSweepTest):
   def setUp(self):

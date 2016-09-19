@@ -47,6 +47,11 @@ class XenonMismatchingRangeError(XenonError):
     self.this_length = this_length
     self.prev_length = prev_length
 
+class XenonUnknownSweepTypeError(XenonError):
+  def __init__(self, sweep_type):
+    super(XenonUnknownSweepTypeError, self).__init__(
+        "Unknown sweep type %s." % sweep_type)
+
 class DuplicateSweepNameError(XenonError):
   def __init__(self, sweep_name):
     super(DuplicateSweepNameError, self).__init__(

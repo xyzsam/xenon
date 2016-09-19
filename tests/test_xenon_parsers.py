@@ -7,7 +7,7 @@ import pyparsing as pp
 import unittest
 
 from xenon.base.commands import *
-from xenon.base.datatypes import DesignSweep
+from xenon.base.designsweeptypes import ExhaustiveSweep
 from xenon.base.parsers import *
 
 # Put the base unittest class in a separate class so that it doesn't get run as
@@ -30,11 +30,12 @@ class Common(object):
 class BeginParser(Common.ParserTestCase):
   def setUp(self):
     self.parser = buildBeginParser()
-    self.testcases = [("begin sweep mysweep", True),
-                      ("BEGIN SWEEP MySweep  ", True),
-                      ("  BeGIn sWeEp sweep123", True),
-                      ("begin sweep sweep_nothing_2  ", True),
-                      ("begin sweep sweep_nothing_2 extra", False),
+    self.testcases = [("begin DesignSweep mysweep", True),
+                      ("BEGIN ExhaustiveSweep MySweep  ", True),
+                      ("  BeGIn ExhaustiveSweep sweep123", True),
+                      ("begin CustomSweep sweep_nothing_2  ", True),
+                      ("begin sweep sweepname", True),
+                      ("begin Sweep sweep_nothing_2 extra", False),
                       ("begin sweep 123sweep", False),
                       ("begin sweep sweep.$#", False),
                       ("begin sweep2", False),

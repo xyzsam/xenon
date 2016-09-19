@@ -3,8 +3,9 @@
 import unittest
 
 import xenon.base.command_bindings as command_bindings
+import xenon.base.globalscope as g
 from xenon.base.commands import *
-from xenon.base.datatypes import DesignSweep, Param
+from xenon.base.datatypes import Param
 from xenon.base.parsers import *
 
 import test_module
@@ -29,18 +30,26 @@ class CommandTestCase(unittest.TestCase):
 
 class BeginAndEndCommands(CommandTestCase):
   def runTest(self):
-    self.executeCommand("begin sweep mysweep")
+    # The begin command requires that sweep = None.
+    self.sweep = None
+    self.sweep = self.executeCommand("begin ExhaustiveSweep mysweep")
     self.assertEqual(self.sweep.name, "mysweep")
-    self.assertEqual(self.sweep.sweep_type, None)
 
     self.executeCommand("end sweep")
     self.assertTrue(self.sweep.isDone())
 
 class UseCommand(CommandTestCase):
-  def runTest(self):
+  def test_normal(self):
     # Must import fully qualified name while we are under tests/.
     self.executeCommand("use xenon.tests.test_module")
     self.assertIn("USE_COMMAND_SWEEP_TEST_OBJ", self.sweep.__dict__)
+
+  def test_global_import(self):
+    """ Tests importing into global scope before a sweep is declared. """
+    self.sweep = None
+    self.executeCommand("use xenon.tests.test_module")
+    self.assertIn("FakeDesignSweep", g.scope.__dict__)
+    self.assertEqual(test_module.FakeDesignSweep, g.scope.__dict__["FakeDesignSweep"])
 
 class SelectionCommand(CommandTestCase):
   def setUp(self):

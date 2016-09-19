@@ -1,7 +1,7 @@
 # We set a few parameters to constant values, after all the sweep commands, to
 # test that those constant values are respected.
 
-begin sweep selections_2
+begin ExhaustiveSweep selections_2
 
 use xenon.tests.machsuite
 
@@ -9,9 +9,6 @@ generate configs
 
 # Set parameters.
 set output_dir "tmp"
-set source_dir "test"
-set simulator "aladdin"
-set memory_type "spad"
 
 set pipelining 1
 set partition_type "cyclic"
@@ -23,4 +20,4 @@ set unrolling for aes_aes.aes256_encrypt_ecb.ecb2 10
 set unrolling for aes_aes.aes_subBytes.sub 12
 
 
-end sweep
+end selections_2

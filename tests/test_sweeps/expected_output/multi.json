@@ -1,6 +1,6 @@
 [
   {
-    "DesignSweep(\"multi\")": {
+    "ExhaustiveSweep(\"multi\")": {
       "Benchmark(\"aes-aes\")": {
         "Array(\"buf\")": {
           "name": "buf", 
@@ -125,16 +125,12 @@
         "name": "bfs-bulk", 
         "pipelining": 1
       }, 
-      "memory_type": "spad", 
       "name": "multi", 
-      "output_dir": "tmp", 
-      "simulator": "aladdin", 
-      "source_dir": "test", 
-      "sweep_type": null
+      "output_dir": "tmp"
     }
   }, 
   {
-    "DesignSweep(\"multi\")": {
+    "ExhaustiveSweep(\"multi\")": {
       "Benchmark(\"aes-aes\")": {
         "Array(\"buf\")": {
           "name": "buf", 
@@ -259,16 +255,12 @@
         "name": "bfs-bulk", 
         "pipelining": 1
       }, 
-      "memory_type": "spad", 
       "name": "multi", 
-      "output_dir": "tmp", 
-      "simulator": "aladdin", 
-      "source_dir": "test", 
-      "sweep_type": null
+      "output_dir": "tmp"
     }
   }, 
   {
-    "DesignSweep(\"multi\")": {
+    "ExhaustiveSweep(\"multi\")": {
       "Benchmark(\"aes-aes\")": {
         "Array(\"buf\")": {
           "name": "buf", 
@@ -393,16 +385,12 @@
         "name": "bfs-bulk", 
         "pipelining": 1
       }, 
-      "memory_type": "spad", 
       "name": "multi", 
-      "output_dir": "tmp", 
-      "simulator": "aladdin", 
-      "source_dir": "test", 
-      "sweep_type": null
+      "output_dir": "tmp"
     }
   }, 
   {
-    "DesignSweep(\"multi\")": {
+    "ExhaustiveSweep(\"multi\")": {
       "Benchmark(\"aes-aes\")": {
         "Array(\"buf\")": {
           "name": "buf", 
@@ -527,16 +515,12 @@
         "name": "bfs-bulk", 
         "pipelining": 1
       }, 
-      "memory_type": "spad", 
       "name": "multi", 
-      "output_dir": "tmp", 
-      "simulator": "aladdin", 
-      "source_dir": "test", 
-      "sweep_type": null
+      "output_dir": "tmp"
     }
   }, 
   {
-    "DesignSweep(\"multi\")": {
+    "ExhaustiveSweep(\"multi\")": {
       "Benchmark(\"aes-aes\")": {
         "Array(\"buf\")": {
           "name": "buf", 
@@ -661,16 +645,12 @@
         "name": "bfs-bulk", 
         "pipelining": 1
       }, 
-      "memory_type": "spad", 
       "name": "multi", 
-      "output_dir": "tmp", 
-      "simulator": "aladdin", 
-      "source_dir": "test", 
-      "sweep_type": null
+      "output_dir": "tmp"
     }
   }, 
   {
-    "DesignSweep(\"multi\")": {
+    "ExhaustiveSweep(\"multi\")": {
       "Benchmark(\"aes-aes\")": {
         "Array(\"buf\")": {
           "name": "buf", 
@@ -795,16 +775,12 @@
         "name": "bfs-bulk", 
         "pipelining": 1
       }, 
-      "memory_type": "spad", 
       "name": "multi", 
-      "output_dir": "tmp", 
-      "simulator": "aladdin", 
-      "source_dir": "test", 
-      "sweep_type": null
+      "output_dir": "tmp"
     }
   }, 
   {
-    "DesignSweep(\"multi\")": {
+    "ExhaustiveSweep(\"multi\")": {
       "Benchmark(\"aes-aes\")": {
         "Array(\"buf\")": {
           "name": "buf", 
@@ -929,16 +905,12 @@
         "name": "bfs-bulk", 
         "pipelining": 1
       }, 
-      "memory_type": "spad", 
       "name": "multi", 
-      "output_dir": "tmp", 
-      "simulator": "aladdin", 
-      "source_dir": "test", 
-      "sweep_type": null
+      "output_dir": "tmp"
     }
   }, 
   {
-    "DesignSweep(\"multi\")": {
+    "ExhaustiveSweep(\"multi\")": {
       "Benchmark(\"aes-aes\")": {
         "Array(\"buf\")": {
           "name": "buf", 
@@ -1063,16 +1035,12 @@
         "name": "bfs-bulk", 
         "pipelining": 1
       }, 
-      "memory_type": "spad", 
       "name": "multi", 
-      "output_dir": "tmp", 
-      "simulator": "aladdin", 
-      "source_dir": "test", 
-      "sweep_type": null
+      "output_dir": "tmp"
     }
   }, 
   {
-    "DesignSweep(\"multi\")": {
+    "ExhaustiveSweep(\"multi\")": {
       "Benchmark(\"aes-aes\")": {
         "Array(\"buf\")": {
           "name": "buf", 
@@ -1197,16 +1165,12 @@
         "name": "bfs-bulk", 
         "pipelining": 1
       }, 
-      "memory_type": "spad", 
       "name": "multi", 
-      "output_dir": "tmp", 
-      "simulator": "aladdin", 
-      "source_dir": "test", 
-      "sweep_type": null
+      "output_dir": "tmp"
     }
   }, 
   {
-    "DesignSweep(\"multi\")": {
+    "ExhaustiveSweep(\"multi\")": {
       "Benchmark(\"aes-aes\")": {
         "Array(\"buf\")": {
           "name": "buf", 
@@ -1331,16 +1295,12 @@
         "name": "bfs-bulk", 
         "pipelining": 1
       }, 
-      "memory_type": "spad", 
       "name": "multi", 
-      "output_dir": "tmp", 
-      "simulator": "aladdin", 
-      "source_dir": "test", 
-      "sweep_type": null
+      "output_dir": "tmp"
     }
   }, 
   {
-    "DesignSweep(\"multi\")": {
+    "ExhaustiveSweep(\"multi\")": {
       "Benchmark(\"aes-aes\")": {
         "Array(\"buf\")": {
           "name": "buf", 
@@ -1465,16 +1425,12 @@
         "name": "bfs-bulk", 
         "pipelining": 1
       }, 
-      "memory_type": "spad", 
       "name": "multi", 
-      "output_dir": "tmp", 
-      "simulator": "aladdin", 
-      "source_dir": "test", 
-      "sweep_type": null
+      "output_dir": "tmp"
     }
   }, 
   {
-    "DesignSweep(\"multi\")": {
+    "ExhaustiveSweep(\"multi\")": {
       "Benchmark(\"aes-aes\")": {
         "Array(\"buf\")": {
           "name": "buf", 
@@ -1599,12 +1555,8 @@
         "name": "bfs-bulk", 
         "pipelining": 1
       }, 
-      "memory_type": "spad", 
       "name": "multi", 
-      "output_dir": "tmp", 
-      "simulator": "aladdin", 
-      "source_dir": "test", 
-      "sweep_type": null
+      "output_dir": "tmp"
     }
   }
 ]

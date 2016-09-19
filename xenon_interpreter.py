@@ -22,7 +22,7 @@ DEBUG = False
 class XenonInterpreter():
   """ Executes a Xenon file.
 
-  The result of the execution is a DesignSweep object, which can then be passed
+  The result of the execution is a BaseDesignSweep object, which can then be passed
   to a ConfigGenerator object to expand the design sweep into each configuration.
   This result can be accessible through the XenonInterpreter.configured_sweep
   attribute.
@@ -94,16 +94,16 @@ class XenonInterpreter():
         self.commands_.append(commandClass)
 
   def execute(self):
-    current_sweep = DesignSweep()
+    current_sweep = None
     for command in self.commands_:
       if DEBUG:
         self.stream.write(command.line + "\n")
       try:
-        command(current_sweep)
+        current_sweep = command(current_sweep)
       except xe.XenonError as e:
         self.handleXenonCommandError(command, e)
 
-      if current_sweep.isDone():
+      if current_sweep and current_sweep.isDone():
         if DEBUG:
           self.stream.write("Configured sweep:\n")
           current_sweep.dump(stream=self.stream)
@@ -112,22 +112,13 @@ class XenonInterpreter():
         else:
           # TODO: Validate the sweep first.
           self.configured_sweeps[current_sweep.name] = current_sweep
-        current_sweep = DesignSweep()
+        current_sweep = None
 
   def generate_outputs(self):
     all_generated_files = []
     for sweep in self.configured_sweeps.itervalues():
-      for output in sweep.generate_outputs:
-        generator_module = self.get_generator_module(output)
-        try:
-          generator = generator_module.get_generator(sweep)
-        except AttributeError as e:
-          self.handleGeneratorError(output, e)
-        try:
-          generated_files = generator.run()
-        except xe.XenonError as e:
-          self.handleGeneratorError(output, e)
-        all_generated_files.extend(generated_files)
+      generated_files = sweep.generateAllOutputs()
+      all_generated_files.extend(generated_files)
     return all_generated_files
 
   def run(self):

@@ -1,4 +1,4 @@
-begin sweep multi
+begin ExhaustiveSweep multi
 
 use xenon.tests.machsuite
 
@@ -6,9 +6,6 @@ generate configs
 
 # Set parameters.
 set output_dir "tmp"
-set source_dir "test"
-set simulator "aladdin"
-set memory_type "spad"
 
 set pipelining 1
 set partition_type "cyclic"
@@ -16,4 +13,4 @@ set partition_type for aes_aes.k "block"
 sweep unrolling for ** from 1 to 4 expstep 2
 sweep partition_factor for ** from 2 to 16 expstep 2
 
-end sweep
+end multi
