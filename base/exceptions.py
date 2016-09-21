@@ -56,10 +56,3 @@ class DuplicateSweepNameError(XenonError):
   def __init__(self, sweep_name):
     super(DuplicateSweepNameError, self).__init__(
         "%s was already declared as the name of another sweep." % sweep_name)
-
-class XenonInvalidAttributeError(XenonError):
-  def __init__(self, msg, valid_options):
-    msg = msg + "\nValid options are: %s" % ",".join(valid_options)
-    # msg = "Attribute %s has invalid value %s. Valid options are: %s" % (
-    #     attribute, value, ",".join(valid_options))
-    super(XenonInvalidAttributeError, self).__init__(msg)

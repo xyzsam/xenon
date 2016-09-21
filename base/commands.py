@@ -69,7 +69,7 @@ class SelectionCommand(Command):
       raise TypeError("%s is not of type XenonObj." % str(env))
 
     # If there was no selection defined, then the selection is implicitly the
-    # entire environment, recursively..
+    # entire environment, recursively.
     if len(self.tokens) == 0:
       self.tokens.append(LIT_STARSTAR)
 

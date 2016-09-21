@@ -43,6 +43,7 @@ class Param(XenonObj):
 
   TODO: This needs to be clarified - parameters in different objects with the
   same id can have different values; they will just be swept jointly.
+
   """
   # Monotonically increasing id for all newly created Params.
   #
@@ -52,22 +53,30 @@ class Param(XenonObj):
   # same order every time. This greatly simplifies testing.
   next_id_ = itertools.count().next
 
-  def __init__(self, name, default, format_func=None):
+  def __init__(self, expected_type, name, default, valid_opts=None, format_func=None):
     super(Param, self).__init__()
     self.id = Param.next_id_()
     self.name = name
     self.default = default
+    self.valid_opts = valid_opts
     # An optional function to run to return a string formatted version of this
     # parameter's value.
     self.format_func = format_func
+    self.expected_type = expected_type
 
-  def __eq__(self, other):
-    if type(self) == type(other):
-      return self.id == other.id
-    elif isinstance(other, str):
-      # This is used by the Sweepable.setSweepParameter function.
-      return self.name == other
-    return False
+    # TODO: Add unit tests for validation.
+    if not isinstance(self.default, expected_type):
+      raise TypeError(
+          "Expected default value {0} of {1} {2} to be {3}.".format(
+              self.default, self.__class__.__name__, self.name, expected_type))
+
+    if not self.valid_opts:
+      return
+
+    for opt in self.valid_opts:
+      if not isinstance(opt, expected_type):
+        raise TypeError("Expected valid option {0} of {1} {2} to be {3}.".format(
+            opt, self.__class__.__name__, self.name, expected_type))
 
   def format(self, value):
     """ Returns a string representation of this value.
@@ -79,6 +88,29 @@ class Param(XenonObj):
       return self.format_func(value)
     return str(value)
 
+  def validate(self, value):
+    """ Checks whether this value is one of the valid options.
+
+    If this value is not valid, raise the appropriate Error.
+    """
+    # None is a valid value for all parameters; it will be filled with the
+    # parameter default, which we have already validated.
+    if not self.valid_opts or value == None:
+      return
+    if not value in self.valid_opts:
+      raise ValueError(
+          "Value {0} is not a valid option for {1} {2}. "
+          "Valid options are: {3}".format(
+              value, self.__class__.__name__, self.name, self.valid_opts))
+
+  def __eq__(self, other):
+    if type(self) == type(other):
+      return self.id == other.id
+    elif isinstance(other, str):
+      # This is used by the Sweepable.setSweepParameter function.
+      return self.name == other
+    return False
+
   def __ne__(self, other):
     return not self.__eq__(other)
 
@@ -87,6 +119,19 @@ class Param(XenonObj):
 
   def __repr__(self):
     return "{0}(\"{1}\",{2})".format(self.__class__.__name__, self.name, self.default)
+
+# Convenience classes for different types of parameters.
+class IntParam(Param):
+  def __init__(self, *args, **kwargs):
+    super(IntParam, self).__init__(int, *args, **kwargs)
+
+class StrParam(Param):
+  def __init__(self, *args, **kwargs):
+    super(StrParam, self).__init__(str, *args, **kwargs)
+
+class BoolParam(Param):
+  def __init__(self, *args, **kwargs):
+    super(BoolParam, self).__init__(bool, *args, **kwargs)
 
 class Sweepable(XenonObj):
   """ Base class for any object with parameters that can be swept.
@@ -105,7 +150,6 @@ class Sweepable(XenonObj):
   1. Explain when parameters should be initialized to None.
   2. Explain how attributes are handled.
   3. Distiguish sweepable_params from sweep_params_range_.
-  4. Remind users never to inherit from Sweepable.
   """
   # A list of sweepable parameters for this class.
   # TODO: If we want to sweep parameters of the same name independently, that
@@ -259,6 +303,14 @@ class Sweepable(XenonObj):
       output[attr] = getattr(self, attr).dictify()
     return {key: output}
 
+  def validate(self):
+    """ Validate all child Sweepable objects and Params. """
+    for obj in self.iterattrvalues(objtype=Sweepable):
+      obj.validate()
+
+    for param in self.__class__.sweepable_params:
+      param.validate(getattr(self, param.name))
+
   def __str__(self):
     return "{0}(\"{1}\")".format(self.__class__.__name__, self.name)
 
@@ -283,6 +335,7 @@ class BaseDesignSweep(Sweepable):
     checks.  However, they should still invoke this through super(). The base
     class only checks that a generate function exists for each generate output.
     """
+    super(BaseDesignSweep, self).validate()
     for output in self.generate_outputs:
       generator_func_name = "generate_%s" % output
       if not hasattr(self, generator_func_name):
