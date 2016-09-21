@@ -104,6 +104,7 @@ class XenonInterpreter():
         self.handleXenonCommandError(command, e)
 
       if current_sweep and current_sweep.isDone():
+        current_sweep.validate()
         if DEBUG:
           self.stream.write("Configured sweep:\n")
           current_sweep.dump(stream=self.stream)

@@ -276,6 +276,22 @@ class BaseDesignSweep(Sweepable):
     # Global settings about this sweep.
     self.output_dir = ""
 
+  def validate(self):
+    """ Raise an exception if this sweep has invalid attributes.
+
+    Subclasses should override this method to implement their own validity
+    checks.  However, they should still invoke this through super(). The base
+    class only checks that a generate function exists for each generate output.
+    """
+    for output in self.generate_outputs:
+      generator_func_name = "generate_%s" % output
+      if not hasattr(self, generator_func_name):
+        raise AttributeError("%s has no method called %s" % (
+            self.__class__.__name__, generator_func_name))
+      if not callable(getattr(self, generator_func_name)):
+        raise TypeError("%s.%s is not a function." % (
+            self.__class__.__name__, generator_func_name))
+
   def initializeSweep(self, name):
     self.name = name
 
@@ -306,4 +322,3 @@ class BaseDesignSweep(Sweepable):
 
   def __repr__(self):
     return "{0}(\"{1}\")".format(self.__class__.__name__, self.name)
-
