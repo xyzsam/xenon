@@ -52,11 +52,14 @@ class Param(XenonObj):
   # same order every time. This greatly simplifies testing.
   next_id_ = itertools.count().next
 
-  def __init__(self, name, default):
+  def __init__(self, name, default, format_func=None):
     super(Param, self).__init__()
     self.id = Param.next_id_()
     self.name = name
     self.default = default
+    # An optional function to run to return a string formatted version of this
+    # parameter's value.
+    self.format_func = format_func
 
   def __eq__(self, other):
     if type(self) == type(other):
@@ -65,6 +68,16 @@ class Param(XenonObj):
       # This is used by the Sweepable.setSweepParameter function.
       return self.name == other
     return False
+
+  def format(self, value):
+    """ Returns a string representation of this value.
+
+    Returns:
+      format_func(value) if format_func was specified; otherwise, str(value).
+    """
+    if self.format_func:
+      return self.format_func(value)
+    return str(value)
 
   def __ne__(self, other):
     return not self.__eq__(other)
