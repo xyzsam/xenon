@@ -4,7 +4,6 @@ import importlib
 import pyparsing as pp
 from pydoc import locate
 
-# TODO: More DesignSweep types by default?
 from xenon.base.datatypes import XenonObj, Sweepable
 from xenon.base.exceptions import *
 from xenon.base.expressions import Expression
@@ -125,8 +124,6 @@ class BeginCommand(Command):
     return None
 
   def execute(self, sweep_obj):
-    # TODO: START HERE>
-    # Begin must now construct a new DesignSweep object using globals!
     assert(sweep_obj == None)
     # Try to construct this sweep object from local scope.
     SweepClassType = self.findSweepClassType()
