@@ -4,7 +4,7 @@
 
 from xenon.base.datatypes import *
 
-fake_param = Param("sweep_param", 0)
+fake_param = IntParam("sweep_param", 0)
 
 class FakeDesignSweep(BaseDesignSweep):
   sweepable_params = BaseDesignSweep.sweepable_params + [fake_param]

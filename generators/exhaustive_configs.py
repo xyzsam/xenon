@@ -32,6 +32,9 @@ class SweepableView(XenonObj):
     for child_name, child in self.sweepable.iterattritems(objtype=Sweepable):
       setattr(self, child_name, SweepableView(child))
       self.attrs.append(child_name)
+    # Make an attribute for the type name.
+    self.attrs.append("type")
+    setattr(self, "type", sweepable_obj.__class__.__name__)
 
   def dump(self, stream=sys.stdout):
     dictified = self.dictify()
