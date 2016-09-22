@@ -199,9 +199,6 @@ class Sweepable(XenonObj):
       # object's parents from values that were specifically set on this object
       # by the user.
       setattr(self, param.name, None)
-      # TODO: This is a BUG that would result from having independent
-      # parameters with the same name but different ids! Ensure that each
-      # Sweepable has uniquely distinct param names.
       self.sweepable_params_dict_[param.name] = param.id
       self.sweepable_params_dict_[param.id] = param.name
 
