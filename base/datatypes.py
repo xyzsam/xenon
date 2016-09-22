@@ -151,9 +151,11 @@ class Sweepable(XenonObj):
   2. Explain how attributes are handled.
   3. Distiguish sweepable_params from sweep_params_range_.
   """
+
   # A list of sweepable parameters for this class.
-  # TODO: If we want to sweep parameters of the same name independently, that
-  # would be a per-instance difference, so this should be part of the instance.
+  # When a Sweepable object is constructed, this list is copied into the
+  # constructed instance. All future references should use that list.
+  # Per-instance lists can be modified, but this list cannot.
   sweepable_params = []
 
   builtins_ = [IntType, FloatType, StringType, DictType, ListType, NoneType,
@@ -166,6 +168,8 @@ class Sweepable(XenonObj):
     self.user_attrs = set()
     super(Sweepable, self).__init__()
     self.name = name
+
+    self.sweepable_params_ = [p for p in self.__class__.sweepable_params]
 
     # Automatically generated mapping to/from Param name and id.
     # TODO: Does this actually provide any significant benefit compared to
@@ -189,7 +193,7 @@ class Sweepable(XenonObj):
 
   def createSweepAttributes(self):
     """ Create an attribute for each parameter in sweepable_params. """
-    for param in self.__class__.sweepable_params:
+    for param in self.sweepable_params_:
       # Setting the value to None by default (instead of param.default) makes
       # it possible to distinguish values that should be inherited from this
       # object's parents from values that were specifically set on this object
@@ -201,8 +205,14 @@ class Sweepable(XenonObj):
       self.sweepable_params_dict_[param.name] = param.id
       self.sweepable_params_dict_[param.id] = param.name
 
+  def removeSweepableParam(self, param):
+    """ Remove the specified Param object from sweepable_params_. """
+    self.sweepable_params_.remove(param)
+    del self.sweepable_params_dict_[param.id]
+    del self.sweepable_params_dict_[param.name]
+
   def getParamDefaultValue(self, name):
-    for param in self.__class__.sweepable_params:
+    for param in self.sweepable_params_:
       if param.name == name:
         return param.default
     return None
@@ -266,14 +276,10 @@ class Sweepable(XenonObj):
     self.sweep_params_range_[param_id] = value_range
     return xe.SUCCESS
 
-  def getSweepableParams(self):
-    """ Returns the list of sweepable parameters for this class. """
-    return self.__class__.sweepable_params
-
   def getSweepableParamsAndValues(self):
     """ Returns a dict of parameter (name, value) for all sweepable parameters. """
     # TODO: Consider making this part of XenonObj.iterattr*
-    return dict((p.name, getattr(self, p.name)) for p in self.getSweepableParams())
+    return dict((p.name, getattr(self, p.name)) for p in self.sweepable_params_)
 
   def dump(self):
     """ Dumps all sweepable parameters in a readable format.
@@ -308,7 +314,7 @@ class Sweepable(XenonObj):
     for obj in self.iterattrvalues(objtype=Sweepable):
       obj.validate()
 
-    for param in self.__class__.sweepable_params:
+    for param in self.sweepable_params_:
       param.validate(getattr(self, param.name))
 
   def __str__(self):
