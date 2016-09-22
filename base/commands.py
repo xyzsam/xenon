@@ -11,18 +11,6 @@ from xenon.base.parsers import *
 import xenon.base.common as common
 import xenon.base.globalscope as g
 
-# def recursiveSelect(root, objtype=object):
-#   """ Recursively selects all attributes of type objtype from root. """
-#   assert(isinstance(root, objtype))
-#   selected_objs = []
-#   for obj in root.iterattrvalues(objtype=objtype):
-#     # Safety check to avoid infinite recursion.
-#     if obj == root:
-#       continue
-#     selected_objs.append(obj)
-#     selected_objs.extend(recursiveSelect(obj, objtype=objtype))
-#   return selected_objs
-
 class Command(XenonObj):
   """ Commands describe an action to perform on a sweep.
 
@@ -180,8 +168,10 @@ class SetCommand(Command):
     for obj in selected_objs:
       if hasattr(obj, self.param):
         setattr(obj, self.param, value)
-        # Remove this parameter from obj.sweep_params_range, if it exists, so that
-        # the sweep generator does not ignore this value.
+        # Remove this parameter from obj.sweep_params_range, if it exists, so
+        # that the sweep generator ignores this value. Note, however, that a
+        # sweep command after the set command can restore this parameter to
+        # sweep_params_range!
         if isinstance(obj, Sweepable) and obj.hasSweepParamRange(self.param):
           obj.removeFromSweepParamRange(self.param)
         is_applied = True
