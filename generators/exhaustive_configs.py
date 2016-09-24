@@ -6,6 +6,7 @@ import sys
 import xenon.base.common as common
 from xenon.base.datatypes import *
 import xenon.base.exceptions as xe
+from xenon.generators import base_generator
 
 class SweepableView(XenonObj):
   """ An overlay for Sweepable objects.
@@ -75,7 +76,7 @@ class ConfigSet(object):
     json_repr = [config.dictify() for config in self.configs]
     json.dump(json_repr, stream, sort_keys=True, indent=2)
 
-class ConfigGenerator(object):
+class ConfigGenerator(base_generator.Generator):
   def __init__(self, configured_sweep):
     self.sweep = configured_sweep
 
