@@ -73,10 +73,6 @@ class SelectionCommand(CommandTestCase):
     self.assertIn(self.sweep.top1.middle1, selected_objs)
     self.assertIn(self.sweep.top1.middle2, selected_objs)
 
-    with self.assertRaises(TypeError):
-      selected_objs = self.executeCommand("for top1.middle0", command_type=KW_FOR)
-      self.assertEqual(len(selected_objs), 0)
-
   def test_recursive(self):
     selected_objs = self.executeCommand("for **", command_type=KW_FOR)
     self.assertEqual(len(selected_objs), 4)

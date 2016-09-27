@@ -8,8 +8,8 @@ class XenonError(Exception):
     super(XenonError, self).__init__(msg)
 
 class SweepNotInitializedError(XenonError):
-  def __init__(self, msg):
-    super(SweepNotInitializedException, self).__init__(
+  def __init__(self):
+    super(SweepNotInitializedError, self).__init__(
         "Sweep has not been initialized with a begin statement.")
 
 class XenonImportError(XenonError):

@@ -237,5 +237,5 @@ class SweepCommand(Command):
         is_applied_at_least_once = True
 
     if not is_applied_at_least_once:
-      raise XenonAttributeError(self.sweep_param)
+      raise XenonEmptySelectionError(self.sweep_param)
     return sweep_obj

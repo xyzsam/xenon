@@ -260,6 +260,8 @@ class Sweepable(XenonObj):
       raise xe.XenonInvalidStepTypeError(name, step_type)
     if (step_type == KW_LINSTEP and step == 0) or (step_type == KW_EXPSTEP and step == 1):
       raise xe.XenonInvalidStepAmountError(name, step, step_type)
+    if (step_type == KW_EXPSTEP and (start == 0 or end == 0)):
+      raise ValueError("Start/end of sweep range cannot be zero for exponential steps.")
     param_id = self.getParamId(name)
     if param_id == None:
       return xe.INVALID_SWEEP_PARAMETER
