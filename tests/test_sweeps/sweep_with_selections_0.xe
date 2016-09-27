@@ -2,9 +2,9 @@
 # correct values when there is a sweep on the same parameter for a larger
 # scope. That is:
 #
-# `sweep unrolling for ** from 1 to 4 expstep` should be applied to all loops
+# `sweep unrolling for * from 1 to 4 expstep` should be applied to all loops
 # except for those under aes_aes.aes256_encrypt_ecb, which have their own sweep
-# commands and come after the sweep on **.
+# commands and come after the sweep on *.
 
 begin ExhaustiveSweep selections_0
 
@@ -18,7 +18,7 @@ set output_dir "tmp"
 set pipelining 1
 set partition_type "cyclic"
 set partition_type for aes_aes.k "block"
-sweep unrolling for ** from 1 to 4 expstep 2
+sweep unrolling for * from 1 to 4 expstep 2
 sweep unrolling for aes_aes.aes256_encrypt_ecb.* from 2 to 8 expstep 2
 sweep unrolling for aes_aes.aes256_encrypt_ecb.ecb2 from 1 to 3 linstep 1
 

@@ -4,10 +4,11 @@
 
 from xenon.base.datatypes import *
 
-fake_param = IntParam("sweep_param", 0)
+int_param = IntParam("int_param", 0)
+str_param = StrParam("str_param", "a")
 
 class FakeDesignSweep(BaseDesignSweep):
-  sweepable_params = BaseDesignSweep.sweepable_params + [fake_param]
+  sweepable_params = BaseDesignSweep.sweepable_params + [int_param, str_param]
   def __init__(self, name):
     super(FakeDesignSweep, self).__init__(name)
 
@@ -15,20 +16,23 @@ def createFakeSweepEnviron():
   """ Builds the following class attribute structure:
 
   self.sweep = {
-      "sweep_param": 0,
+      "int_param": 0,
+      "str_param": "a",
       "top0": "a top value",
       "top1": {
-        "sweep_param": 0,
+        "int_param": 0,
         "middle0": "a middle value",
         "middle1": {
           "low0": "a low value",
           "low1": "another low value",
-          "sweep_param": 0,
+          "int_param": 0,
+          "str_param": "a",
           }
         "middle2": {
           "low0": "a second low value",
           "low1": "another second low value",
-          "sweep_param": 0,
+          "int_param": 0,
+          "str_param": "a",
           }
       }
   }

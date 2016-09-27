@@ -17,7 +17,6 @@ KW_LINSTEP = "linstep"
 KW_EXPSTEP = "expstep"
 
 LIT_STAR = "*"
-LIT_STARSTAR = "**"  # Recursive version of LIT_STAR.
 
 commands = [
     CMD_BEGIN,
@@ -40,7 +39,6 @@ other_keywords = [
 
 special_literals = [
     LIT_STAR,
-    LIT_STARSTAR,
 ]
 
 reserved = {}
@@ -88,10 +86,9 @@ def buildGenerateParser():
 def buildSelectionParser():
   """ A selection is an optional statement of the following form:
 
-  selection = ["for" + ("**" | "*" | ((ident + ".") ...) ["**" | "*"])]
+  selection = ["for" + ("*" | ((ident + ".") ...) ["*"])]
   """
-  # Try to match the double ** first before the single *.
-  star_literals = reserved[LIT_STARSTAR] | reserved[LIT_STAR]
+  star_literals = reserved[LIT_STAR]
   selection_path = (
       Group(star_literals) |
       Group(delimitedList(ident, delim=".") + Optional(Literal(".").suppress() + star_literals))

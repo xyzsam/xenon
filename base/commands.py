@@ -59,11 +59,11 @@ class SelectionCommand(Command):
     # If there was no selection defined, then the selection is implicitly the
     # entire environment, recursively.
     if len(self.tokens) == 0:
-      self.tokens.append(LIT_STARSTAR)
+      self.tokens.append(LIT_STAR)
 
     current_view = env
     for i, token in enumerate(self.tokens):
-      if token == LIT_STAR or token == LIT_STARSTAR:
+      if token == LIT_STAR:
         break
       try:
         current_view = getattr(current_view, token)
@@ -75,10 +75,8 @@ class SelectionCommand(Command):
 
     selected_objs = []
     if token == LIT_STAR:
-      selected_objs = [v for v in current_view.iterattrvalues(objtype=XenonObj)]
-    elif token == LIT_STARSTAR:
       selected_objs = common.recursiveSelect(current_view, objtype=XenonObj)
-    # Remember: * and ** return not just all the children of the current view,
+    # Remember: * returns not just all the children of the current view,
     # but the current view itself.
     selected_objs.extend([current_view])
     return selected_objs
