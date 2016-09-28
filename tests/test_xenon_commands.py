@@ -1,5 +1,6 @@
 # A suite of unit tests for command execution.
 
+import numpy as np
 import unittest
 
 import xenon.base.command_bindings as command_bindings
@@ -125,6 +126,111 @@ class SetCommand(CommandTestCase):
     self.assertEqual(self.sweep.top1.middle1.str_param, "mystring")
     self.assertEqual(self.sweep.top1.middle2.str_param, "mystring")
     self.assertEqual(self.sweep.top1.str_param, "mystring")
+
+class Expressions(CommandTestCase):
+  def test_simple_expressions(self):
+    self.executeCommand("set int_param 3")
+    self.executeCommand("set int_param for top1 2")
+    self.assertEqual(self.sweep.int_param, 3)
+    self.assertEqual(self.sweep.top1.int_param, 2)
+
+    self.executeCommand("set int_param 1")
+    self.assertEqual(self.sweep.int_param, 1)
+
+    self.executeCommand("set int_param for top1 int_param")
+    self.assertEqual(self.sweep.top1.int_param, self.sweep.int_param)
+
+    self.executeCommand("set int_param for top1 int_param + 3")
+    self.assertEqual(self.sweep.top1.int_param, 4)
+
+    self.executeCommand("set int_param for top1.middle1 top1.int_param + 3")
+    self.assertEqual(self.sweep.top1.middle1.int_param, 7)
+
+    # IntParam should be only int, but since this is Python, the user can do
+    # whatever they like. In the real scenario, we should catch this type error
+    # during validation.
+    self.executeCommand("set int_param for top1.middle1 top1.int_param + 3.3")
+    self.assertAlmostEqual(self.sweep.top1.middle1.int_param, 7.3)
+
+    self.executeCommand("set int_param for top1.middle1 top1.int_param - 3.3")
+    self.assertAlmostEqual(self.sweep.top1.middle1.int_param, 0.7)
+
+    self.executeCommand("set int_param for top1 int_param / 3")
+    self.assertAlmostEqual(self.sweep.top1.int_param, 1.0/3)
+
+    self.executeCommand("set int_param for top1 int_param * 5")
+    self.assertAlmostEqual(self.sweep.top1.int_param, 5)
+
+  def test_compare_expressions(self):
+    self.executeCommand("set int_param 1")
+    self.assertEqual(self.sweep.int_param, 1)
+
+    self.executeCommand("set int_param for top1 int_param == 1")
+    self.assertTrue(self.sweep.top1.int_param)
+
+    self.executeCommand("set int_param for top1 int_param > 5")
+    self.assertFalse(self.sweep.top1.int_param)
+
+    self.executeCommand("set int_param for top1 int_param > 0")
+    self.assertTrue(self.sweep.top1.int_param)
+
+    self.executeCommand("set int_param for top1 int_param >= 1")
+    self.assertTrue(self.sweep.top1.int_param)
+
+    self.executeCommand("set int_param for top1 int_param <= 1")
+    self.assertTrue(self.sweep.top1.int_param)
+
+    self.executeCommand("set int_param for top1 int_param < 0")
+    self.assertFalse(self.sweep.top1.int_param)
+
+    self.executeCommand("set int_param for top1 int_param != 0")
+    self.assertTrue(self.sweep.top1.int_param)
+
+  def test_nested_expressions(self):
+    self.executeCommand("set int_param 10")
+    self.executeCommand("set int_param for top1 5")
+    self.assertEqual(self.sweep.int_param, 10)
+    self.assertEqual(self.sweep.top1.int_param, 5)
+
+    self.executeCommand("set int_param for top1 (int_param * 5) - 3")
+    self.assertAlmostEqual(self.sweep.top1.int_param, 47)
+
+    self.executeCommand("set int_param for top1 (int_param * 5) / 10")
+    self.assertAlmostEqual(self.sweep.top1.int_param, 5)
+
+    self.executeCommand(
+        "set int_param for top1.middle1 (top1.int_param * 5) / (int_param)")
+    self.assertAlmostEqual(self.sweep.top1.middle1.int_param, 2.5)
+
+    self.executeCommand(
+        "set int_param for top1.middle1 (top1.int_param * 5) / (int_param - 1)")
+    self.assertAlmostEqual(self.sweep.top1.middle1.int_param, 25/9.0)
+
+    self.executeCommand(
+        "set int_param for top1.middle1 (top1.int_param * 5) / (top1.int_param - 1)")
+    self.assertAlmostEqual(self.sweep.top1.middle1.int_param, 25/4.0)
+
+  def test_expressions_with_lists(self):
+    self.executeCommand("set int_param [1,2,3]")
+    self.executeCommand("set int_param for top1 [2,3,4]")
+
+    self.executeCommand("set int_param for top1.middle1 top1.int_param + int_param")
+    self.assertTrue(np.array_equal(self.sweep.top1.middle1.int_param, [3,5,7]))
+
+    self.executeCommand("set int_param for top1.middle1 top1.int_param - int_param")
+    self.assertTrue(np.array_equal(self.sweep.top1.middle1.int_param, [1,1,1]))
+
+    self.executeCommand("set int_param for top1.middle1 top1.int_param * 10")
+    self.assertTrue(np.array_equal(self.sweep.top1.middle1.int_param, [20,30,40]))
+
+    self.executeCommand("set int_param for top1.middle1 top1.int_param / 2")
+    self.assertTrue(np.array_equal(self.sweep.top1.middle1.int_param, [1,1.5,2]))
+
+    self.executeCommand("set int_param for top1.middle1 top1.int_param + 10")
+    self.assertTrue(np.array_equal(self.sweep.top1.middle1.int_param, [12,13,14]))
+
+    self.executeCommand("set int_param for top1.middle1 top1.int_param - 10")
+    self.assertTrue(np.array_equal(self.sweep.top1.middle1.int_param, [-8,-7,-6]))
 
 class SweepCommand(CommandTestCase):
   def setUp(self):

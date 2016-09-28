@@ -15,6 +15,7 @@ import xenon.base.exceptions as xe
 from xenon.base.commands import *
 from xenon.base.command_bindings import getParser, getCommandClass
 from xenon.base.datatypes import *
+from xenon.base.parsers import buildCommandParser
 
 DEBUG = False
 

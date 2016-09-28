@@ -1,32 +1,12 @@
 from pyparsing import *
 from xenon.base.expressions import convertToExpressionTree
-
-CMD_BEGIN = "begin"
-CMD_END = "end"
-CMD_SWEEP = "sweep"
-CMD_SET = "set"
-CMD_REQUIRE = "require"
-CMD_GENERATE = "generate"
-CMD_USE = "use"
-
-KW_FOR = "for"
-KW_FROM = "from"
-KW_TO = "to"
-KW_ALL = "all"
-KW_LINSTEP = "linstep"
-KW_EXPSTEP = "expstep"
-
-KW_TRUE = "True"
-KW_FALSE = "False"
-
-LIT_STAR = "*"
+from xenon.base.keywords import *
 
 commands = [
     CMD_BEGIN,
     CMD_END,
     CMD_SWEEP,
     CMD_SET,
-#    CMD_REQUIRE,
     CMD_GENERATE,
     CMD_USE,
 ]
@@ -45,7 +25,6 @@ other_keywords = [
 special_literals = [
     LIT_STAR,
 ]
-
 reserved = {}
 
 SOL = LineStart()
@@ -108,7 +87,7 @@ def buildExpressionParser():
   evaluated.
   """
   kws = MatchFirst(map(CaselessKeyword, [k for k in reserved.iterkeys()]))
-  valid_expression = Group(OneOrMore(Word(alphanums + "()/+-<>=._")))
+  valid_expression = Group(OneOrMore(Word(alphanums + "()/+-<>=._*")))
   return valid_expression.setResultsName("expression").setParseAction(convertToExpressionTree)
 
 def buildListParser():

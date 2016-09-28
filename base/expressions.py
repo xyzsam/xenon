@@ -6,35 +6,48 @@
 # of the parsed tokens.
 
 import abc
+import numpy as np
 from pyparsing import Word, nums, alphas, alphanums, Combine, oneOf, \
-    opAssoc, infixNotation, ParseException, delimitedList
+    opAssoc, infixNotation, ParseException, delimitedList, MatchFirst
+from xenon.base.datatypes import XenonObj
+from xenon.base.common import getSelectedObjs
 
 class Expression(object):
   """ Base class for all evaluatable expressions. """
   __metaclass__ = abc.ABCMeta
 
   @abc.abstractmethod
-  def eval(self):
+  def eval(self, env):
     pass
 
 class EvalConstant(Expression):
     "Class to evaluate a parsed constant or variable"
     vars_ = {}
     def __init__(self, tokens):
-        self.value = tokens[0]
-    def eval(self):
-        if self.value in EvalConstant.vars_:
-            return EvalConstant.vars_[self.value]
+        if len(tokens.constant):
+            self.is_constant = True
+            self.value = tokens.constant
         else:
+            self.is_constant = False
+            self.value = tokens.selection
+    def eval(self, env):
+        if self.is_constant:
             return float(self.value)
+        else:
+            # This is a selection.
+            obj = getSelectedObjs(self.value, env)[0]
+            if isinstance(obj, list):
+                return np.array(obj)
+            else:
+                return float(obj)
 
 class EvalSignOp(Expression):
     "Class to evaluate expressions with a leading + or - sign"
     def __init__(self, tokens):
         self.sign, self.value = tokens[0]
-    def eval(self):
+    def eval(self, env):
         mult = {'+':1, '-':-1}[self.sign]
-        return mult * self.value.eval()
+        return mult * self.value.eval(env)
 
 def operatorOperands(tokenlist):
     "generator to extract operators and operands in pairs"
@@ -49,27 +62,27 @@ class EvalMultOp(Expression):
     "Class to evaluate multiplication and division expressions"
     def __init__(self, tokens):
         self.value = tokens[0]
-    def eval(self):
-        prod = self.value[0].eval()
+    def eval(self, env):
+        prod = self.value[0].eval(env)
         for op,val in operatorOperands(self.value[1:]):
             if op == '*':
-                prod *= val.eval()
-            if op == '/':
-                prod /= val.eval()
+                prod = prod * val.eval(env)
+            elif op == '/':
+                prod = prod / val.eval(env)
         return prod
 
 class EvalAddOp(Expression):
     "Class to evaluate addition and subtraction expressions"
     def __init__(self, tokens):
         self.value = tokens[0]
-    def eval(self):
-        sum = self.value[0].eval()
+    def eval(self, env):
+        sum_value = self.value[0].eval(env)
         for op,val in operatorOperands(self.value[1:]):
             if op == '+':
-                sum += val.eval()
-            if op == '-':
-                sum -= val.eval()
-        return sum
+                sum_value = sum_value + val.eval(env)
+            elif op == '-':
+                sum_value = sum_value -  val.eval(env)
+        return sum_value
 
 class EvalComparisonOp(Expression):
     "Class to evaluate comparison expressions"
@@ -79,22 +92,15 @@ class EvalComparisonOp(Expression):
         ">" : lambda a,b : a > b,
         ">=" : lambda a,b : a >= b,
         "!=" : lambda a,b : a != b,
-        "=" : lambda a,b : a == b,
-        "LT" : lambda a,b : a < b,
-        "LE" : lambda a,b : a <= b,
-        "GT" : lambda a,b : a > b,
-        "GE" : lambda a,b : a >= b,
-        "NE" : lambda a,b : a != b,
-        "EQ" : lambda a,b : a == b,
-        "<>" : lambda a,b : a != b,
+        "==" : lambda a,b : a == b,
         }
     def __init__(self, tokens):
         self.value = tokens[0]
-    def eval(self):
-        val1 = self.value[0].eval()
+    def eval(self, env):
+        val1 = self.value[0].eval(env)
         for op,val in operatorOperands(self.value[1:]):
             fn = EvalComparisonOp.opMap[op]
-            val2 = val.eval()
+            val2 = val.eval(env)
             if not fn(val1,val2):
                 break
             val1 = val2
@@ -104,10 +110,11 @@ class EvalComparisonOp(Expression):
 
 
 # define the parser
-integer = Word(nums)
-real = Combine(Word(nums) + "." + Word(nums))
-variable = Word(alphas, alphanums + "_")
-variable_chain = delimitedList(variable, delim=".")
+integer = Word(nums).setResultsName("constant")
+real = Combine(Word(nums) + "." + Word(nums)).setResultsName("constant")
+constant = MatchFirst(real, integer).setResultsName("constant")
+variable = Word(alphas, alphanums + "_").setResultsName("selection")
+variable_chain = delimitedList(variable, delim=".").setResultsName("selection")
 operand = real | integer | variable_chain | variable
 
 signop = oneOf('+ -')
@@ -123,7 +130,7 @@ arith_expr = infixNotation(operand,
      (plusop, 2, opAssoc.LEFT, EvalAddOp),
     ])
 
-comparisonop = oneOf("< <= > >= != = <> LT GT LE GE EQ NE")
+comparisonop = oneOf("< <= > >= != == <> LT GT LE GE EQ NE")
 comp_expr = infixNotation(arith_expr,
     [
     (comparisonop, 2, opAssoc.LEFT, EvalComparisonOp),
@@ -140,83 +147,3 @@ def convertToExpressionTree(tokens=None):
   if not tokens:
     raise ParseException("Failed to parse expression")
   return ParseExpression(' '.join(tokens[0]))
-
-def main():
-    # sample expressions posted on comp.lang.python, asking for advice
-    # in safely evaluating them
-    rules=[
-             '( A - B ) = 0',
-             '(A + B + C + D + E + F + G + H + I) = J',
-             '(A + B + C + D + E + F + G + H) = I',
-             '(A + B + C + D + E + F) = G',
-             '(A + B + C + D + E) = (F + G + H + I + J)',
-             '(A + B + C + D + E) = (F + G + H + I)',
-             '(A + B + C + D + E) = F',
-             '(A + B + C + D) = (E + F + G + H)',
-             '(A + B + C) = (D + E + F)',
-             '(A + B) = (C + D + E + F)',
-             '(A + B) = (C + D)',
-             '(A + B) = (C - D + E - F - G + H + I + J)',
-             '(A + B) = C',
-             '(A + B) = 0',
-             '(A+B+C+D+E) = (F+G+H+I+J)',
-             '(A+B+C+D) = (E+F+G+H)',
-             '(A+B+C+D)=(E+F+G+H)',
-             '(A+B+C)=(D+E+F)',
-             '(A+B)=(C+D)',
-             '(A+B)=C',
-             '(A-B)=C',
-             '(A/(B+C))',
-             '(B/(C+D))',
-             '(G + H) = I',
-             '-0.99 LE ((A+B+C)-(D+E+F+G)) LE 0.99',
-             '-0.99 LE (A-(B+C)) LE 0.99',
-             '-1000.00 LE A LE 0.00',
-             '-5000.00 LE A LE 0.00',
-             'A < B',
-             'A < 7000',
-             'A = -(B)',
-             'A = C',
-             'A = 0',
-             'A GT 0',
-             'A GT 0.00',
-             'A GT 7.00',
-             'A LE B',
-             'A LT -1000.00',
-             'A LT -5000',
-             'A LT 0',
-             'A=(B+C+D)',
-             'A=B',
-             'I = (G + H)',
-             '0.00 LE A LE 4.00',
-             '4.00 LT A LE 7.00',
-             '0.00 LE A LE 4.00 LE E > D',
-         ]
-    vars_={'A': 0, 'B': 1.1, 'C': 2.2, 'D': 3.3, 'E': 4.4, 'F': 5.5, 'G':
-    6.6, 'H':7.7, 'I':8.8, 'J':9.9}
-
-    # define tests from given rules
-    tests = []
-    for t in rules:
-        t_orig = t
-        t = t.replace("=","==")
-        t = t.replace("EQ","==")
-        t = t.replace("LE","<=")
-        t = t.replace("GT",">")
-        t = t.replace("LT","<")
-        t = t.replace("GE",">=")
-        t = t.replace("LE","<=")
-        t = t.replace("NE","!=")
-        t = t.replace("<>","!=")
-        # tests.append( (t_orig,eval(t,vars_)) )
-        tests.append((t_orig, None))
-
-    # copy vars_to EvalConstant lookup dict
-    EvalConstant.vars_ = vars_
-    for test,expected in tests:
-        ret = ParseExpression(test)
-        # ret = comp_expr.parseString(test, parseAll=True)[0]
-        print test, expected, ret.eval()
-
-if __name__=='__main__':
-    main()

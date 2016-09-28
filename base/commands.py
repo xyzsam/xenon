@@ -7,7 +7,7 @@ from pydoc import locate
 from xenon.base.datatypes import XenonObj, Sweepable
 from xenon.base.exceptions import *
 from xenon.base.expressions import Expression
-from xenon.base.parsers import *
+from xenon.base.keywords import *
 import xenon.base.common as common
 import xenon.base.globalscope as g
 
@@ -50,36 +50,9 @@ class SelectionCommand(Command):
   def select(self, env):
     """ Return a list of objects in an environment selected by this selection.
 
-    The environment is a dict-like object in that it must support the in and []
-    operators, and it must return an object that does the same.
+    See common.select() for more details.
     """
-    if not isinstance(env, XenonObj):
-      raise TypeError("%s is not of type XenonObj." % str(env))
-
-    # If there was no selection defined, then the selection is implicitly the
-    # entire environment, recursively.
-    if len(self.tokens) == 0:
-      self.tokens.append(LIT_STAR)
-
-    current_view = env
-    for i, token in enumerate(self.tokens):
-      if token == LIT_STAR:
-        break
-      try:
-        current_view = getattr(current_view, token)
-      except AttributeError:
-        raise XenonSelectionError(".".join(self.tokens))
-      if not isinstance(current_view, XenonObj):
-        selection_path = ".".join(self.tokens[:i+1])
-        raise TypeError("%s is not of type XenonObj.")
-
-    selected_objs = []
-    if token == LIT_STAR:
-      selected_objs = common.recursiveSelect(current_view, objtype=XenonObj)
-    # Remember: * returns not just all the children of the current view,
-    # but the current view itself.
-    selected_objs.extend([current_view])
-    return selected_objs
+    return common.getSelectedObjs(self.tokens, env)
 
   def execute(self, env):
     return self.select(env)
@@ -159,7 +132,7 @@ class SetCommand(Command):
     """
     value = None
     if isinstance(self.value, Expression):
-      value = self.value.eval()
+      value = self.value.eval(sweep_obj)
     else:
       value = self.value
 

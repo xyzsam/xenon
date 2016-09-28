@@ -50,9 +50,9 @@ class SweepableExceptions(CommandTestCase):
 
 class CommandExceptions(CommandTestCase):
   def test_selections(self):
-    self.assertRaises(TypeError, 
-        self.executeCommand, "for top1.middle0", command_type=KW_FOR)
-    self.assertRaises(xe.XenonSelectionError, 
+    self.assertRaises(TypeError,
+        self.executeCommand, "for top1.middle0.*", command_type=KW_FOR)
+    self.assertRaises(xe.XenonSelectionError,
         self.executeCommand, "for top1.bad_attr", command_type=KW_FOR)
     self.sweep = 0
     self.assertRaises(TypeError, "0 is not of type XenonObj",
@@ -68,10 +68,25 @@ class CommandExceptions(CommandTestCase):
         self.executeCommand, "set some_attr 0")
     self.assertRaises(xe.XenonSelectionError,
         self.executeCommand, "set some_attr for mysweep 0")
+    self.sweep = 0
+    self.assertRaises(TypeError,
+        self.executeCommand, "set int_param for top1 1")
 
   def test_use(self):
     self.assertRaises(xe.XenonImportError,
         self.executeCommand, "use bad_package")
+
+class ExpressionExceptions(CommandTestCase):
+  def test_env_not_xenonobj(self):
+    self.sweep = 0
+    self.assertRaises(TypeError, "0 is not of type XenonObj",
+        self.executeCommand, "set int_param for top1 1")
+
+  @unittest.skip("Attributes that have not been set are assigned value None.")
+  def test_bad_selection(self):
+    self.assertRaises(xe.XenonSelectionError,
+        self.executeCommand, "set int_param for top1 top1.middle2.int_param")
+
 
 if __name__ == "__main__":
   unittest.main()
