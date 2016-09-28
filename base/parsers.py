@@ -16,6 +16,9 @@ KW_ALL = "all"
 KW_LINSTEP = "linstep"
 KW_EXPSTEP = "expstep"
 
+KW_TRUE = "True"
+KW_FALSE = "False"
+
 LIT_STAR = "*"
 
 commands = [
@@ -35,6 +38,8 @@ other_keywords = [
     KW_ALL,
     KW_LINSTEP,
     KW_EXPSTEP,
+    KW_TRUE,
+    KW_FALSE,
 ]
 
 special_literals = [
@@ -47,7 +52,7 @@ SOL = LineStart()
 EOL = LineEnd()
 # An identifier must begin with a letter but can include numbers and underscores.
 ident = Word(alphas, alphanums + "_")
-string = QuotedString('"')
+string = QuotedString('"') | QuotedString("'")
 comment = Optional(pythonStyleComment).setResultsName("comment")
 set_value = Word(alphanums, alphanums + "/")
 
@@ -106,23 +111,45 @@ def buildExpressionParser():
   valid_expression = Group(OneOrMore(Word(alphanums + "()/+-<>=._")))
   return valid_expression.setResultsName("expression").setParseAction(convertToExpressionTree)
 
+def buildListParser():
+  """ A list is a statement of the following form:
+
+  list = "[" + ((nums | string | True | False) + "," ...) + "]"
+
+  Generally, it is meant to mimic Python lists. However, because Xenon lists
+  are designed to represent sweep ranges, we impose the following limitations:
+    - Lists cannot contain lists as elements.
+
+  At the moment, we don't support variables in Xenon, so we do not match
+  against any identifier, only numbers, strings, and True/False. If we decide
+  to implement support for variables, this will change.
+  """
+  numbers = Word(nums).setParseAction(lambda s,l,t: [ int(t[0]) ])
+  bools = reserved[KW_TRUE] | reserved[KW_FALSE]
+  bools.setParseAction(lambda s,l,t: [ t[0].lower() == "true" ])
+  value = numbers | string | bools
+  list_parser = Group(Literal("[").suppress() + delimitedList(value, ",") + Literal("]").suppress())
+  return list_parser
+
 def buildSetParser():
   """ A set command is specified by the following BNF:
 
   variable = (alpha, alphanums | "_" | ".")
   string = "\" + (alphanums | "/") + "\""
-  value = nums | expression
+  list = "[" + ((nums | string) + "," ...) + "]
+  value = nums | list | string | expression
   set = "set" ident ["for" selection] value
   """
   selection = buildSelectionParser()
   constant = Word(nums).setResultsName("constant")
   stringValue = string.setResultsName("string")
   expression = buildExpressionParser().setResultsName("expression")
+  listValue = buildListParser().setResultsName("list")
   set_parser = (
       reserved["set"] +
       ident.setResultsName("param") +
       selection +
-      (constant | stringValue | expression)
+      (constant | listValue | stringValue | expression)
   )
   return set_parser
 
@@ -156,9 +183,10 @@ def buildSweepParser():
   """
   selection = buildSelectionParser()
   sweep_range = buildRangeParser()
+  listValue = buildListParser().setResultsName("list")
   sweep_parser = (
       reserved["sweep"] + ident.setResultsName("sweep_param") +
-      selection + sweep_range)
+      selection + (sweep_range | listValue))
   return sweep_parser
 
 def buildUseParser():

@@ -142,6 +142,8 @@ class SetCommand(Command):
       self.value = int(parse_result.constant)
     elif len(parse_result.string):
       self.value = parse_result.string
+    elif len(parse_result.list):
+      self.value = list(parse_result.list)
     else:
       self.value = parse_result.expression
 
@@ -216,10 +218,15 @@ class GenerateCommand(Command):
 class SweepCommand(Command):
   def __init__(self, lineno, line, parse_result):
     super(SweepCommand, self).__init__(lineno, line, parse_result)
-    self.sweep_start = int(parse_result.range.start)
-    self.sweep_end = int(parse_result.range.end)
-    self.step = int(parse_result.range.step.amount)
-    self.step_type = parse_result.range.step.type
+    if parse_result.range:
+      self.is_explicit_list = False
+      self.sweep_start = int(parse_result.range.start)
+      self.sweep_end = int(parse_result.range.end)
+      self.step = int(parse_result.range.step.amount)
+      self.step_type = parse_result.range.step.type
+    elif parse_result.list:
+      self.is_explicit_list = True
+      self.list_value = parse_result.list
     self.sweep_param = parse_result.sweep_param
     self.selection = SelectionCommand(lineno, line, parse_result)
 
@@ -229,8 +236,12 @@ class SweepCommand(Command):
     for obj in selected_objs:
       if not isinstance(obj, Sweepable):
         continue
-      ret = obj.setSweepParameter(self.sweep_param, self.sweep_start, self.sweep_end,
-                                  self.step, self.step_type)
+      if self.is_explicit_list:
+        ret = obj.setSweepParameterList(self.sweep_param, self.list_value)
+      else:
+        ret = obj.setSweepParameter(
+            self.sweep_param, self.sweep_start, self.sweep_end,
+            self.step, self.step_type)
       if ret == SUCCESS:
         is_applied_at_least_once = True
 

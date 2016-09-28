@@ -249,7 +249,8 @@ class Sweepable(XenonObj):
     """ Sets the named sweep parameter with the given range.
 
     Returns:
-      INVALID_SWEEP_PARAMETER: if this parameter is not sweepable.
+      INVALID_SWEEP_PARAMETER: if this object does not have this parameter, or
+        if this parameter is not sweepable.
       SUCCESS: otherwise.
 
     Throws:
@@ -273,6 +274,20 @@ class Sweepable(XenonObj):
       value_range = [start * (step ** exp)
                      for exp in range(0, int(math.log(end/start, step))+1)]
     self.sweep_params_range_[param_id] = value_range
+    return xe.SUCCESS
+
+  def setSweepParameterList(self, name, list_value):
+    """ Sets the named sweep parameter to the provided list of values.
+
+    Returns:
+      INVALID_SWEEP_PARAMETER: if this object does not have this parameter, or
+        if this parameter is not sweepable.
+      SUCCESS: otherwise.
+    """
+    param_id = self.getParamId(name)
+    if param_id == None:
+      return xe.INVALID_SWEEP_PARAMETER
+    self.sweep_params_range_[param_id] = list_value
     return xe.SUCCESS
 
   def getSweepableParamsAndValues(self):

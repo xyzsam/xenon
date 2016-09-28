@@ -80,6 +80,18 @@ class SetCommand(CommandTestCase):
     self.executeCommand("set output_dir \"path/to/output\"")
     self.assertEqual(self.sweep.output_dir, "path/to/output")
 
+    self.executeCommand("set output_dir ['a','b','c']")
+    self.assertEqual(self.sweep.output_dir, ["a", "b", "c"])
+
+    self.executeCommand("set output_dir [0,1,2]")
+    self.assertEqual(self.sweep.output_dir, [0,1,2])
+
+    self.executeCommand("set output_dir [True,False,True]")
+    self.assertEqual(self.sweep.output_dir, [True, False, True])
+
+    self.executeCommand("set output_dir [0,False,\"s\"]")
+    self.assertEqual(self.sweep.output_dir, [0, False, "s"])
+
   def test_set_with_selections(self):
     self.executeCommand("set int_param for * 3")
     self.assertEqual(self.sweep.int_param, 3)
@@ -137,6 +149,9 @@ class SweepCommand(CommandTestCase):
     self.executeCommand("sweep int_param from 4 to 16 expstep 3")
     self.assertTrue(self.sweep.hasSweepParamRange("int_param"))
     self.assertEqual(self.sweep.getSweepParamRange("int_param"), [4, 12])
+
+    self.executeCommand("sweep int_param [1,4,6,9]")
+    self.assertTrue(self.sweep.getSweepParamRange("int_param"), [1,4,6,9])
 
   def test_selective_sweeps(self):
     self.executeCommand("sweep int_param for * from 1 to 8 linstep 1")
