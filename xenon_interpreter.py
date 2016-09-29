@@ -96,8 +96,6 @@ class XenonInterpreter():
   def execute(self):
     current_sweep = None
     for command in self.commands_:
-      if DEBUG:
-        self.stream.write(command.line + "\n")
       try:
         current_sweep = command(current_sweep)
       except xe.XenonError as e:
@@ -105,9 +103,6 @@ class XenonInterpreter():
 
       if current_sweep and current_sweep.isDone():
         current_sweep.validate()
-        if DEBUG:
-          self.stream.write("Configured sweep:\n")
-          current_sweep.dump(stream=self.stream)
         if current_sweep.name in self.configured_sweeps:
           raise xe.DuplicateSweepNameError(current_sweep.name)
         else:

@@ -60,7 +60,7 @@ class CommandExceptions(CommandTestCase):
 
   def test_begin(self):
     self.sweep = None  # Begin requires the sweep obj to be None.
-    self.assertRaises(xe.XenonUnknownSweepTypeError,
+    self.assertRaises(xe.XenonTypeError,
         self.executeCommand, "begin BadSweepType sweep")
 
   def test_set(self):

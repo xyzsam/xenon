@@ -9,7 +9,6 @@ from xenon.xenon_interpreter import XenonInterpreter
 
 TEST_DIR = "tests/test_sweeps"
 EXPECTED_OUTPUT_DIR = os.path.join(TEST_DIR, "expected_output")
-TEST_FILE = "test.out"
 
 class Common(object):
   class CompleteSweepTest(unittest.TestCase):
@@ -26,6 +25,7 @@ class Common(object):
       self.assertEqual(expected, output)
 
     def tearDown(self):
+      return
       if len(self.genfiles):
         output_dir = os.path.dirname(self.genfiles[0])
         shutil.rmtree(output_dir)
@@ -53,6 +53,10 @@ class SelectionsSweep1(Common.CompleteSweepTest):
 class SelectionsSweep2(Common.CompleteSweepTest):
   def setUp(self):
     self.testcase = "sweep_with_selections_2.xe"
+
+class ExpressionSweep(Common.CompleteSweepTest):
+  def setUp(self):
+    self.testcase = "expression_with_sweep.xe"
 
 if __name__ == '__main__':
   unittest.main()

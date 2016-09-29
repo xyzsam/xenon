@@ -91,11 +91,11 @@ class Param(XenonObj):
   def validate(self, value):
     """ Checks whether this value is one of the valid options.
 
-    If this value is not valid, raise the appropriate Error.
+    If this value is not valid, raise the appropriate Error; otherwise, return.
     """
-    # None is a valid value for all parameters; it will be filled with the
-    # parameter default, which we have already validated.
-    if not self.valid_opts or value == None:
+    if not self.valid_opts:
+      return
+    if isinstance(value, UnassignedParamValue):
       return
     if not value in self.valid_opts:
       raise ValueError(
@@ -133,6 +133,22 @@ class BoolParam(Param):
   def __init__(self, *args, **kwargs):
     super(BoolParam, self).__init__(bool, *args, **kwargs)
 
+class UnassignedParamValue(XenonObj):
+  """ An object to represent a Param attribute without a value. 
+
+  Attempting to convert this object into a float or int will raise a
+  XenonTypeError.  This is preferable to assigning None to unassigned values,
+  since it is much more specific and less likely to happen on accident.
+  """
+  def __init__(self):
+    super(UnassignedParamValue, self).__init__()
+
+  def __float__(self):
+    raise xe.XenonTypeError("UnassignedParamValue cannot be converted to float.")
+
+  def __int__(self):
+    raise xe.XenonTypeError("UnassignedParamValue cannot be converted to int.")
+
 class Sweepable(XenonObj):
   """ Base class for any object with parameters that can be swept.
 
@@ -159,7 +175,8 @@ class Sweepable(XenonObj):
   sweepable_params = []
 
   builtins_ = [IntType, FloatType, StringType, DictType, ListType, NoneType,
-               BooleanType, LongType, ComplexType, TupleType, UnicodeType]
+               BooleanType, LongType, ComplexType, TupleType, UnicodeType,
+               UnassignedParamValue]
 
   def __init__(self, name):
     # We must add the user_attrs attribute before calling the super
@@ -194,11 +211,11 @@ class Sweepable(XenonObj):
   def createSweepAttributes(self):
     """ Create an attribute for each parameter in sweepable_params. """
     for param in self.sweepable_params_:
-      # Setting the value to None by default (instead of param.default) makes
-      # it possible to distinguish values that should be inherited from this
-      # object's parents from values that were specifically set on this object
-      # by the user.
-      setattr(self, param.name, None)
+      # Setting the value to UnassignedParamValue by default (instead of
+      # param.default) makes it possible to distinguish values that should be
+      # inherited from this object's parents from values that were specifically
+      # set on this object by the user.
+      setattr(self, param.name, UnassignedParamValue())
       self.sweepable_params_dict_[param.name] = param.id
       self.sweepable_params_dict_[param.id] = param.name
 

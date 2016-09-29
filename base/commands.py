@@ -4,7 +4,7 @@ import importlib
 import pyparsing as pp
 from pydoc import locate
 
-from xenon.base.datatypes import XenonObj, Sweepable
+from xenon.base.datatypes import XenonObj, Sweepable, UnassignedParamValue
 from xenon.base.exceptions import *
 from xenon.base.expressions import Expression
 from xenon.base.keywords import *
@@ -87,7 +87,7 @@ class BeginCommand(Command):
     # Try to construct this sweep object from local scope.
     SweepClassType = self.findSweepClassType()
     if not SweepClassType:
-      raise XenonUnknownSweepTypeError(self.sweep_class_name)
+      raise XenonTypeError("Unknown sweep type {}.".format(self.sweep_class_name))
     sweep_obj = SweepClassType(self.name)
     sweep_obj.initializeSweep(self.name)
     return sweep_obj
@@ -127,27 +127,41 @@ class SetCommand(Command):
 
     The syntax purposely allows for * to select all members of an object, even
     ones that do not have this parameter. If, after going through all selected
-    objects, none have the parameter as an attribute, issue a warning but do
-    not abort.
+    objects, none have the parameter as an attribute, raise an exception.
+
+    Expressions can naturally refer to attributes of other Sweepable objects,
+    but there are a few ways they can be written, so we attempt to evaluate
+    them in three places.
+      1. Evaluate it using the sweep object as the top level scope.
+      2. Evaluate it during config generation time. This covers scenarios where the
+         expression depends on the value of a swept parameter.
     """
-    value = None
-    if isinstance(self.value, Expression):
-      value = self.value.eval(sweep_obj)
-    else:
-      value = self.value
+    value = self.value
+    if isinstance(value, Expression):
+      try:
+        # Attempt to evaluate the expression with at sweep scope.
+        value = self.value.eval(sweep_obj)
+      except XenonTypeError as e:
+        # If we fail because of an unassigned parameter, try again during sweep
+        # generation.
+        value = self.value
+      except XenonSelectionError as e:
+        # If the selection failed, then don't do anything.
+        value = UnassignedParamValue()
 
     selected_objs = self.selection(sweep_obj)
     is_applied = False
     for obj in selected_objs:
       if hasattr(obj, self.param):
-        setattr(obj, self.param, value)
+        if not isinstance(value, UnassignedParamValue):
+          setattr(obj, self.param, value)
+        is_applied = True
         # Remove this parameter from obj.sweep_params_range, if it exists, so
         # that the sweep generator ignores this value. Note, however, that a
         # sweep command after the set command can restore this parameter to
         # sweep_params_range!
         if isinstance(obj, Sweepable) and obj.hasSweepParamRange(self.param):
           obj.removeFromSweepParamRange(self.param)
-        is_applied = True
 
     if not is_applied:
       raise XenonEmptySelectionError(self.param)

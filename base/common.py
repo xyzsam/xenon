@@ -28,7 +28,7 @@ def getSelectedObjs(select_tokens, env):
     select_tokens.append(LIT_STAR)
 
   current_view = env
-  for i, token in enumerate(select_tokens):
+  for token in select_tokens:
     if token == LIT_STAR:
       break
     try:
@@ -39,10 +39,32 @@ def getSelectedObjs(select_tokens, env):
   selected_objs = []
   if token == LIT_STAR:
     if not isinstance(current_view, XenonObj):
-      selection_path = ".".join(select_tokens[:i+1])
-      raise TypeError("%s is not of type XenonObj." % current_view)
+      selection_path = ".".join(select_tokens[:-1])
+      raise TypeError("%s is not of type XenonObj." % selection_path)
     selected_objs = recursiveSelect(current_view, objtype=XenonObj)
   # Remember: * returns not just all the children of the current view,
   # but the current view itself.
   selected_objs.extend([current_view])
   return selected_objs
+
+def getSelectedAttrOnView(select_tokens, view):
+  """ Return the selected attribute over a SweepableView.
+
+  Unlike getSelectedObjs, this does not return a list of XenonObjs, but rather
+  a single object. * is not supported in this case.
+  """
+  if len(select_tokens) == 0:
+    return view
+
+  selection_path = ".".join(select_tokens)
+  current_view = view
+  for token in select_tokens:
+    if token == LIT_STAR:
+      raise SyntaxError(
+          "%s: * is not a valid selection in an expression." % selection_path)
+    try:
+      current_view = getattr(current_view, token)
+    except AttributeError:
+      raise xe.XenonSelectionError(selection_path)
+
+  return current_view

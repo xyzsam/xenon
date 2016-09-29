@@ -1,0 +1,16 @@
+begin ExhaustiveSweep expr
+
+use xenon.tests.machsuite
+
+generate configs
+
+# Set parameters.
+set output_dir "tmp" # A comment
+
+# Only sweep this variable.
+sweep partition_factor from 1 to 4
+# Unrolling will be "swept" with values equal to this partition_factor.
+set unrolling aes_aes.sbox.partition_factor
+
+
+end expr

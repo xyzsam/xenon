@@ -10,7 +10,7 @@ import numpy as np
 from pyparsing import Word, nums, alphas, alphanums, Combine, oneOf, \
     opAssoc, infixNotation, ParseException, delimitedList, MatchFirst
 from xenon.base.datatypes import XenonObj
-from xenon.base.common import getSelectedObjs
+from xenon.base.common import getSelectedAttrOnView
 
 class Expression(object):
   """ Base class for all evaluatable expressions. """
@@ -33,13 +33,12 @@ class EvalConstant(Expression):
     def eval(self, env):
         if self.is_constant:
             return float(self.value)
+        # Otherwise, this is a selection.
+        obj = getSelectedAttrOnView(self.value, env)
+        if isinstance(obj, list):
+            return np.array(obj)
         else:
-            # This is a selection.
-            obj = getSelectedObjs(self.value, env)[0]
-            if isinstance(obj, list):
-                return np.array(obj)
-            else:
-                return float(obj)
+            return float(obj)
 
 class EvalSignOp(Expression):
     "Class to evaluate expressions with a leading + or - sign"

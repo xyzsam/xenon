@@ -1,11 +1,13 @@
 import itertools
 import json
+import numpy as np
 import os
 import sys
 
 import xenon.base.common as common
-from xenon.base.datatypes import *
 import xenon.base.exceptions as xe
+from xenon.base.datatypes import *
+from xenon.base.expressions import Expression
 from xenon.generators import base_generator
 
 class SweepableView(XenonObj):
@@ -26,7 +28,7 @@ class SweepableView(XenonObj):
     # Copy the sweepable attributes from sweepable_obj.
     for name in self.sweepable.user_attrs:
       value = getattr(self.sweepable, name)
-      if not isinstance(value, XenonObj):
+      if not isinstance(value, Sweepable):
         setattr(self, name, value)
         self.attrs.append(name)
     # Recursively copy all Sweepable children from sweepable_obj.
@@ -70,6 +72,7 @@ class ConfigSet(object):
   as a valid JSON file.
   """
   def __init__(self, configs):
+    # List of generated configurations, where each config is dict.
     self.configs = configs
 
   def dump(self, stream=sys.stdout):
@@ -100,9 +103,15 @@ class ConfigGenerator(base_generator.Generator):
     param_range_len = self.discoverSweptParameters()
     indices_list = []
     id_list = []
-    for param_id, range_len in param_range_len.iteritems():
+    # To preserve stability in sweep parameter ordering, first obtain the list
+    # of param ids, sort them, then get the appropriate index ranges. Splitting
+    # it up this way lets us achieve the same result as applying np.argsort()
+    # to both arrays without requiring numpy.
+    for param_id in param_range_len.iterkeys():
       id_list.append(param_id)
-      indices_list.append(range(0, range_len))
+    id_list.sort()
+    for param_id in id_list:
+      indices_list.append(range(0, param_range_len[param_id]))
     indices_list = tuple(indices_list)
 
     # index_combinations is a generator of tuples, where the ith value is the
@@ -112,6 +121,7 @@ class ConfigGenerator(base_generator.Generator):
     for indices in index_combinations:
       top_view = SweepableView(self.sweep)
       self.applySweepParamValues(top_view, id_list, indices)
+      self.applyExpressionValues(top_view)
       self.applyDefaultParamValues(top_view)
       generated_configs.append(top_view)
 
@@ -131,11 +141,30 @@ class ConfigGenerator(base_generator.Generator):
   def applyDefaultParamValues(self, root_view):
     """ Set any parameters untouched by 'set' or 'sweep' commands to default values. """
     for attr in root_view.attrs:
-      if getattr(root_view, attr) == None:
+      if isinstance(getattr(root_view, attr), UnassignedParamValue):
         setattr(root_view, attr, root_view.sweepable.getParamDefaultValue(attr))
 
     for child_view in root_view.iterattrvalues(objtype=SweepableView):
       self.applyDefaultParamValues(child_view)
+
+  def applyExpressionValues(self, root_view, parent_view=None):
+    """ Evaluate any expressions that could not be evaluated earlier.
+
+    Expressions that cannot be evaluated at command execution time are those
+    that:
+      - Reference an attribute that was marked to be swept.
+      - Reference an attribute that was left to its default value. Default
+        values are resolved at sweep generation time.
+    """
+    if parent_view == None:
+      parent_view = root_view
+    for attr in root_view.attrs:
+      attr_value = getattr(root_view, attr)
+      if isinstance(attr_value, Expression):
+        setattr(root_view, attr, attr_value.eval(parent_view))
+
+    for child_view in root_view.iterattrvalues(objtype=SweepableView):
+      self.applyExpressionValues(child_view, parent_view)
 
   def discoverSweptParameters(self):
     """ Return a list of all swept Param objects.
