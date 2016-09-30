@@ -15,7 +15,6 @@ import xenon.base.exceptions as xe
 from xenon.base.commands import *
 from xenon.base.parser import XenonParser
 from xenon.base.datatypes import *
-from xenon.base.parsers import buildCommandParser
 
 DEBUG = False
 
@@ -31,8 +30,6 @@ class XenonInterpreter():
     self.filename = filename
     # List of (line_number, ParseResult) tuples.
     self.commands_ = []
-    # Parser object for the complete line.
-    self.line_parser_ = buildCommandParser()
     # All the sweeps that have been configured, but not yet expanded.
     self.configured_sweeps = {}
 

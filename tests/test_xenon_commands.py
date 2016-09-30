@@ -7,7 +7,6 @@ import xenon.base.parser
 import xenon.base.globalscope as g
 from xenon.base.commands import *
 from xenon.base.datatypes import Param
-from xenon.base.parsers import *
 
 import test_module
 
