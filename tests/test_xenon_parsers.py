@@ -8,7 +8,7 @@ import unittest
 
 from xenon.base.commands import *
 from xenon.base.designsweeptypes import ExhaustiveSweep
-from xenon.base.parsers import *
+from xenon.base.parser_builders import *
 
 # Put the base unittest class in a separate class so that it doesn't get run as
 # a test case.

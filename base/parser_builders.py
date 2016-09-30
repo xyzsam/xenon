@@ -2,31 +2,6 @@ from pyparsing import *
 from xenon.base.expressions import convertToExpressionTree
 from xenon.base.keywords import *
 
-commands = [
-    CMD_BEGIN,
-    CMD_END,
-    CMD_SWEEP,
-    CMD_SET,
-    CMD_GENERATE,
-    CMD_USE,
-]
-
-other_keywords = [
-    KW_FOR,
-    KW_FROM,
-    KW_TO,
-    KW_ALL,
-    KW_LINSTEP,
-    KW_EXPSTEP,
-    KW_TRUE,
-    KW_FALSE,
-]
-
-special_literals = [
-    LIT_STAR,
-]
-reserved = {}
-
 SOL = LineStart()
 EOL = LineEnd()
 # An identifier must begin with a letter but can include numbers and underscores.
@@ -34,17 +9,6 @@ ident = Word(alphas, alphanums + "_")
 string = QuotedString('"') | QuotedString("'")
 comment = Optional(pythonStyleComment).setResultsName("comment")
 set_value = Word(alphanums, alphanums + "/")
-
-def buildKeywords():
-  global reserved
-  for command in commands:
-    reserved[command] = CaselessKeyword(command).setResultsName(command)
-  for other in other_keywords:
-    reserved[other] = CaselessKeyword(other).setResultsName(other)
-  for literal in special_literals:
-    reserved[literal] = Literal(literal)
-
-buildKeywords()
 
 def buildBeginParser():
   # Sweep names must begin with letters.
@@ -184,6 +148,18 @@ def buildUseParser():
   package_path = Group(delimitedList(ident, delim=".")).setResultsName("package_path")
   use_parser = reserved["use"] + package_path
   return use_parser
+
+def buildSourceParser():
+  """ A source command is specified by the following BNF:
+
+  source = "source" + string
+
+  The source command accepts a string as a filepath, opens that path, parses that
+  file as a Xenon file, and appends the parsed commands to the current Xenon file.
+  This command is executed at parse time.
+  """
+  source_parser = reserved[CMD_SOURCE] + string.setResultsName("source_file")
+  return source_parser
 
 def buildCommandParser():
   """ Parses a complete command line.

@@ -1,0 +1,782 @@
+[
+  {
+    "ExhaustiveSweep(\"source\")": {
+      "Benchmark(\"aes-aes\")": {
+        "Array(\"buf\")": {
+          "name": "buf", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 16, 
+          "type": "Array", 
+          "word_length": 1
+        }, 
+        "Array(\"ctx\")": {
+          "name": "ctx", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 96, 
+          "type": "Array", 
+          "word_length": 1
+        }, 
+        "Array(\"k\")": {
+          "name": "k", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 32, 
+          "type": "Array", 
+          "word_length": 1
+        }, 
+        "Array(\"rcon\")": {
+          "name": "rcon", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 1, 
+          "type": "Array", 
+          "word_length": 1
+        }, 
+        "Array(\"sbox\")": {
+          "name": "sbox", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 256, 
+          "type": "Array", 
+          "word_length": 1
+        }, 
+        "Function(\"aes256_encrypt_ecb\")": {
+          "Loop(\"ecb1\")": {
+            "name": "ecb1", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "Loop(\"ecb2\")": {
+            "name": "ecb2", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "Loop(\"ecb3\")": {
+            "name": "ecb3", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "name": "aes256_encrypt_ecb", 
+          "type": "Function"
+        }, 
+        "Function(\"aes_addRoundKey\")": {
+          "Loop(\"addkey\")": {
+            "name": "addkey", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "name": "aes_addRoundKey", 
+          "type": "Function"
+        }, 
+        "Function(\"aes_addRoundKey_cpy\")": {
+          "Loop(\"cpkey\")": {
+            "name": "cpkey", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "name": "aes_addRoundKey_cpy", 
+          "type": "Function"
+        }, 
+        "Function(\"aes_subBytes\")": {
+          "Loop(\"sub\")": {
+            "name": "sub", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "name": "aes_subBytes", 
+          "type": "Function"
+        }, 
+        "cycle_time": 1, 
+        "name": "aes-aes", 
+        "pipelining": 0, 
+        "type": "Benchmark"
+      }, 
+      "Benchmark(\"bfs-bulk\")": {
+        "Array(\"edges\")": {
+          "name": "edges", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 4096, 
+          "type": "Array", 
+          "word_length": 8
+        }, 
+        "Array(\"level\")": {
+          "name": "level", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 256, 
+          "type": "Array", 
+          "word_length": 1
+        }, 
+        "Array(\"level_counts\")": {
+          "name": "level_counts", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 10, 
+          "type": "Array", 
+          "word_length": 8
+        }, 
+        "Array(\"nodes\")": {
+          "name": "nodes", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 512, 
+          "type": "Array", 
+          "word_length": 8
+        }, 
+        "Function(\"bfs\")": {
+          "Loop(\"loop_horizons\")": {
+            "name": "loop_horizons", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "Loop(\"loop_neighbors\")": {
+            "name": "loop_neighbors", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "Loop(\"loop_nodes\")": {
+            "name": "loop_nodes", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "name": "bfs", 
+          "type": "Function"
+        }, 
+        "cycle_time": 1, 
+        "name": "bfs-bulk", 
+        "pipelining": 0, 
+        "type": "Benchmark"
+      }, 
+      "name": "source", 
+      "output_dir": "source_tmp", 
+      "type": "ExhaustiveSweep"
+    }
+  }, 
+  {
+    "ExhaustiveSweep(\"source\")": {
+      "Benchmark(\"aes-aes\")": {
+        "Array(\"buf\")": {
+          "name": "buf", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 16, 
+          "type": "Array", 
+          "word_length": 1
+        }, 
+        "Array(\"ctx\")": {
+          "name": "ctx", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 96, 
+          "type": "Array", 
+          "word_length": 1
+        }, 
+        "Array(\"k\")": {
+          "name": "k", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 32, 
+          "type": "Array", 
+          "word_length": 1
+        }, 
+        "Array(\"rcon\")": {
+          "name": "rcon", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 1, 
+          "type": "Array", 
+          "word_length": 1
+        }, 
+        "Array(\"sbox\")": {
+          "name": "sbox", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 256, 
+          "type": "Array", 
+          "word_length": 1
+        }, 
+        "Function(\"aes256_encrypt_ecb\")": {
+          "Loop(\"ecb1\")": {
+            "name": "ecb1", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "Loop(\"ecb2\")": {
+            "name": "ecb2", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "Loop(\"ecb3\")": {
+            "name": "ecb3", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "name": "aes256_encrypt_ecb", 
+          "type": "Function"
+        }, 
+        "Function(\"aes_addRoundKey\")": {
+          "Loop(\"addkey\")": {
+            "name": "addkey", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "name": "aes_addRoundKey", 
+          "type": "Function"
+        }, 
+        "Function(\"aes_addRoundKey_cpy\")": {
+          "Loop(\"cpkey\")": {
+            "name": "cpkey", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "name": "aes_addRoundKey_cpy", 
+          "type": "Function"
+        }, 
+        "Function(\"aes_subBytes\")": {
+          "Loop(\"sub\")": {
+            "name": "sub", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "name": "aes_subBytes", 
+          "type": "Function"
+        }, 
+        "cycle_time": 2, 
+        "name": "aes-aes", 
+        "pipelining": 0, 
+        "type": "Benchmark"
+      }, 
+      "Benchmark(\"bfs-bulk\")": {
+        "Array(\"edges\")": {
+          "name": "edges", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 4096, 
+          "type": "Array", 
+          "word_length": 8
+        }, 
+        "Array(\"level\")": {
+          "name": "level", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 256, 
+          "type": "Array", 
+          "word_length": 1
+        }, 
+        "Array(\"level_counts\")": {
+          "name": "level_counts", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 10, 
+          "type": "Array", 
+          "word_length": 8
+        }, 
+        "Array(\"nodes\")": {
+          "name": "nodes", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 512, 
+          "type": "Array", 
+          "word_length": 8
+        }, 
+        "Function(\"bfs\")": {
+          "Loop(\"loop_horizons\")": {
+            "name": "loop_horizons", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "Loop(\"loop_neighbors\")": {
+            "name": "loop_neighbors", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "Loop(\"loop_nodes\")": {
+            "name": "loop_nodes", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "name": "bfs", 
+          "type": "Function"
+        }, 
+        "cycle_time": 2, 
+        "name": "bfs-bulk", 
+        "pipelining": 0, 
+        "type": "Benchmark"
+      }, 
+      "name": "source", 
+      "output_dir": "source_tmp", 
+      "type": "ExhaustiveSweep"
+    }
+  }, 
+  {
+    "ExhaustiveSweep(\"source\")": {
+      "Benchmark(\"aes-aes\")": {
+        "Array(\"buf\")": {
+          "name": "buf", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 16, 
+          "type": "Array", 
+          "word_length": 1
+        }, 
+        "Array(\"ctx\")": {
+          "name": "ctx", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 96, 
+          "type": "Array", 
+          "word_length": 1
+        }, 
+        "Array(\"k\")": {
+          "name": "k", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 32, 
+          "type": "Array", 
+          "word_length": 1
+        }, 
+        "Array(\"rcon\")": {
+          "name": "rcon", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 1, 
+          "type": "Array", 
+          "word_length": 1
+        }, 
+        "Array(\"sbox\")": {
+          "name": "sbox", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 256, 
+          "type": "Array", 
+          "word_length": 1
+        }, 
+        "Function(\"aes256_encrypt_ecb\")": {
+          "Loop(\"ecb1\")": {
+            "name": "ecb1", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "Loop(\"ecb2\")": {
+            "name": "ecb2", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "Loop(\"ecb3\")": {
+            "name": "ecb3", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "name": "aes256_encrypt_ecb", 
+          "type": "Function"
+        }, 
+        "Function(\"aes_addRoundKey\")": {
+          "Loop(\"addkey\")": {
+            "name": "addkey", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "name": "aes_addRoundKey", 
+          "type": "Function"
+        }, 
+        "Function(\"aes_addRoundKey_cpy\")": {
+          "Loop(\"cpkey\")": {
+            "name": "cpkey", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "name": "aes_addRoundKey_cpy", 
+          "type": "Function"
+        }, 
+        "Function(\"aes_subBytes\")": {
+          "Loop(\"sub\")": {
+            "name": "sub", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "name": "aes_subBytes", 
+          "type": "Function"
+        }, 
+        "cycle_time": 3, 
+        "name": "aes-aes", 
+        "pipelining": 0, 
+        "type": "Benchmark"
+      }, 
+      "Benchmark(\"bfs-bulk\")": {
+        "Array(\"edges\")": {
+          "name": "edges", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 4096, 
+          "type": "Array", 
+          "word_length": 8
+        }, 
+        "Array(\"level\")": {
+          "name": "level", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 256, 
+          "type": "Array", 
+          "word_length": 1
+        }, 
+        "Array(\"level_counts\")": {
+          "name": "level_counts", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 10, 
+          "type": "Array", 
+          "word_length": 8
+        }, 
+        "Array(\"nodes\")": {
+          "name": "nodes", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 512, 
+          "type": "Array", 
+          "word_length": 8
+        }, 
+        "Function(\"bfs\")": {
+          "Loop(\"loop_horizons\")": {
+            "name": "loop_horizons", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "Loop(\"loop_neighbors\")": {
+            "name": "loop_neighbors", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "Loop(\"loop_nodes\")": {
+            "name": "loop_nodes", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "name": "bfs", 
+          "type": "Function"
+        }, 
+        "cycle_time": 3, 
+        "name": "bfs-bulk", 
+        "pipelining": 0, 
+        "type": "Benchmark"
+      }, 
+      "name": "source", 
+      "output_dir": "source_tmp", 
+      "type": "ExhaustiveSweep"
+    }
+  }, 
+  {
+    "ExhaustiveSweep(\"source\")": {
+      "Benchmark(\"aes-aes\")": {
+        "Array(\"buf\")": {
+          "name": "buf", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 16, 
+          "type": "Array", 
+          "word_length": 1
+        }, 
+        "Array(\"ctx\")": {
+          "name": "ctx", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 96, 
+          "type": "Array", 
+          "word_length": 1
+        }, 
+        "Array(\"k\")": {
+          "name": "k", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 32, 
+          "type": "Array", 
+          "word_length": 1
+        }, 
+        "Array(\"rcon\")": {
+          "name": "rcon", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 1, 
+          "type": "Array", 
+          "word_length": 1
+        }, 
+        "Array(\"sbox\")": {
+          "name": "sbox", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 256, 
+          "type": "Array", 
+          "word_length": 1
+        }, 
+        "Function(\"aes256_encrypt_ecb\")": {
+          "Loop(\"ecb1\")": {
+            "name": "ecb1", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "Loop(\"ecb2\")": {
+            "name": "ecb2", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "Loop(\"ecb3\")": {
+            "name": "ecb3", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "name": "aes256_encrypt_ecb", 
+          "type": "Function"
+        }, 
+        "Function(\"aes_addRoundKey\")": {
+          "Loop(\"addkey\")": {
+            "name": "addkey", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "name": "aes_addRoundKey", 
+          "type": "Function"
+        }, 
+        "Function(\"aes_addRoundKey_cpy\")": {
+          "Loop(\"cpkey\")": {
+            "name": "cpkey", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "name": "aes_addRoundKey_cpy", 
+          "type": "Function"
+        }, 
+        "Function(\"aes_subBytes\")": {
+          "Loop(\"sub\")": {
+            "name": "sub", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "name": "aes_subBytes", 
+          "type": "Function"
+        }, 
+        "cycle_time": 4, 
+        "name": "aes-aes", 
+        "pipelining": 0, 
+        "type": "Benchmark"
+      }, 
+      "Benchmark(\"bfs-bulk\")": {
+        "Array(\"edges\")": {
+          "name": "edges", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 4096, 
+          "type": "Array", 
+          "word_length": 8
+        }, 
+        "Array(\"level\")": {
+          "name": "level", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 256, 
+          "type": "Array", 
+          "word_length": 1
+        }, 
+        "Array(\"level_counts\")": {
+          "name": "level_counts", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 10, 
+          "type": "Array", 
+          "word_length": 8
+        }, 
+        "Array(\"nodes\")": {
+          "name": "nodes", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 512, 
+          "type": "Array", 
+          "word_length": 8
+        }, 
+        "Function(\"bfs\")": {
+          "Loop(\"loop_horizons\")": {
+            "name": "loop_horizons", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "Loop(\"loop_neighbors\")": {
+            "name": "loop_neighbors", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "Loop(\"loop_nodes\")": {
+            "name": "loop_nodes", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "name": "bfs", 
+          "type": "Function"
+        }, 
+        "cycle_time": 4, 
+        "name": "bfs-bulk", 
+        "pipelining": 0, 
+        "type": "Benchmark"
+      }, 
+      "name": "source", 
+      "output_dir": "source_tmp", 
+      "type": "ExhaustiveSweep"
+    }
+  }, 
+  {
+    "ExhaustiveSweep(\"source\")": {
+      "Benchmark(\"aes-aes\")": {
+        "Array(\"buf\")": {
+          "name": "buf", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 16, 
+          "type": "Array", 
+          "word_length": 1
+        }, 
+        "Array(\"ctx\")": {
+          "name": "ctx", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 96, 
+          "type": "Array", 
+          "word_length": 1
+        }, 
+        "Array(\"k\")": {
+          "name": "k", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 32, 
+          "type": "Array", 
+          "word_length": 1
+        }, 
+        "Array(\"rcon\")": {
+          "name": "rcon", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 1, 
+          "type": "Array", 
+          "word_length": 1
+        }, 
+        "Array(\"sbox\")": {
+          "name": "sbox", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 256, 
+          "type": "Array", 
+          "word_length": 1
+        }, 
+        "Function(\"aes256_encrypt_ecb\")": {
+          "Loop(\"ecb1\")": {
+            "name": "ecb1", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "Loop(\"ecb2\")": {
+            "name": "ecb2", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "Loop(\"ecb3\")": {
+            "name": "ecb3", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "name": "aes256_encrypt_ecb", 
+          "type": "Function"
+        }, 
+        "Function(\"aes_addRoundKey\")": {
+          "Loop(\"addkey\")": {
+            "name": "addkey", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "name": "aes_addRoundKey", 
+          "type": "Function"
+        }, 
+        "Function(\"aes_addRoundKey_cpy\")": {
+          "Loop(\"cpkey\")": {
+            "name": "cpkey", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "name": "aes_addRoundKey_cpy", 
+          "type": "Function"
+        }, 
+        "Function(\"aes_subBytes\")": {
+          "Loop(\"sub\")": {
+            "name": "sub", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "name": "aes_subBytes", 
+          "type": "Function"
+        }, 
+        "cycle_time": 5, 
+        "name": "aes-aes", 
+        "pipelining": 0, 
+        "type": "Benchmark"
+      }, 
+      "Benchmark(\"bfs-bulk\")": {
+        "Array(\"edges\")": {
+          "name": "edges", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 4096, 
+          "type": "Array", 
+          "word_length": 8
+        }, 
+        "Array(\"level\")": {
+          "name": "level", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 256, 
+          "type": "Array", 
+          "word_length": 1
+        }, 
+        "Array(\"level_counts\")": {
+          "name": "level_counts", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 10, 
+          "type": "Array", 
+          "word_length": 8
+        }, 
+        "Array(\"nodes\")": {
+          "name": "nodes", 
+          "partition_factor": 1, 
+          "partition_type": "cyclic", 
+          "size": 512, 
+          "type": "Array", 
+          "word_length": 8
+        }, 
+        "Function(\"bfs\")": {
+          "Loop(\"loop_horizons\")": {
+            "name": "loop_horizons", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "Loop(\"loop_neighbors\")": {
+            "name": "loop_neighbors", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "Loop(\"loop_nodes\")": {
+            "name": "loop_nodes", 
+            "type": "Loop", 
+            "unrolling": 1
+          }, 
+          "name": "bfs", 
+          "type": "Function"
+        }, 
+        "cycle_time": 5, 
+        "name": "bfs-bulk", 
+        "pipelining": 0, 
+        "type": "Benchmark"
+      }, 
+      "name": "source", 
+      "output_dir": "source_tmp", 
+      "type": "ExhaustiveSweep"
+    }
+  }
+]

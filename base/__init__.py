@@ -1,10 +1,10 @@
 __all__ = [
     "commands",
-    "command_bindings",
+    "parser",
     "common",
     "datatypes",
     "designsweeptypes",
     "exceptions",
     "expressions",
-    "parsers",
+    "parser_builders",
 ]

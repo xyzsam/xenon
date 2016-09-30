@@ -1,0 +1,13 @@
+begin ExhaustiveSweep source
+
+use xenon.tests.machsuite
+
+generate configs
+
+# Set parameters.
+source "source_settings.xe"
+
+# Only sweep this variable.
+sweep cycle_time from 1 to 5
+
+end source

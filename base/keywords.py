@@ -1,4 +1,5 @@
 # All keywords.
+from pyparsing import CaselessKeyword, Literal
 
 CMD_BEGIN = "begin"
 CMD_END = "end"
@@ -7,6 +8,7 @@ CMD_SET = "set"
 CMD_REQUIRE = "require"
 CMD_GENERATE = "generate"
 CMD_USE = "use"
+CMD_SOURCE = "source"
 
 KW_FOR = "for"
 KW_FROM = "from"
@@ -19,3 +21,41 @@ KW_TRUE = "True"
 KW_FALSE = "False"
 
 LIT_STAR = "*"
+
+commands = [
+    CMD_BEGIN,
+    CMD_END,
+    CMD_SWEEP,
+    CMD_SET,
+    CMD_GENERATE,
+    CMD_USE,
+    CMD_SOURCE,
+]
+
+other_keywords = [
+    KW_FOR,
+    KW_FROM,
+    KW_TO,
+    KW_ALL,
+    KW_LINSTEP,
+    KW_EXPSTEP,
+    KW_TRUE,
+    KW_FALSE,
+]
+
+special_literals = [
+    LIT_STAR,
+]
+
+reserved = {}
+
+def buildKeywords():
+  global reserved
+  for command in commands:
+    reserved[command] = CaselessKeyword(command).setResultsName(command)
+  for other in other_keywords:
+    reserved[other] = CaselessKeyword(other).setResultsName(other)
+  for literal in special_literals:
+    reserved[literal] = Literal(literal)
+
+buildKeywords()

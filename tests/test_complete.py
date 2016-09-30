@@ -25,7 +25,6 @@ class Common(object):
       self.assertEqual(expected, output)
 
     def tearDown(self):
-      return
       if len(self.genfiles):
         output_dir = os.path.dirname(self.genfiles[0])
         shutil.rmtree(output_dir)
@@ -57,6 +56,10 @@ class SelectionsSweep2(Common.CompleteSweepTest):
 class ExpressionSweep(Common.CompleteSweepTest):
   def setUp(self):
     self.testcase = "expression_with_sweep.xe"
+
+class SourceCommand(Common.CompleteSweepTest):
+  def setUp(self):
+    self.testcase = "source_test.xe"
 
 if __name__ == '__main__':
   unittest.main()

@@ -3,7 +3,7 @@
 import numpy as np
 import unittest
 
-import xenon.base.command_bindings as command_bindings
+import xenon.base.parser
 import xenon.base.globalscope as g
 from xenon.base.commands import *
 from xenon.base.datatypes import Param
@@ -24,9 +24,9 @@ class CommandTestCase(unittest.TestCase):
     """
     if not command_type:
       command_type = command_str.split()[0]
-    parser = command_bindings.getParser(command_type)
-    results = parser.parseString(command_str)
-    command = command_bindings.getCommandClass(command_type)(0, command_str, results)
+    command_parser = xenon.base.parser.getParser(command_type)
+    results = command_parser.parseString(command_str)
+    command = xenon.base.parser.getCommandClass(command_type)(0, command_str, results)
     return command(self.sweep)
 
 class BeginAndEndCommands(CommandTestCase):

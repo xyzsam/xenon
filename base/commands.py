@@ -193,6 +193,14 @@ class UseCommand(Command):
       raise XenonImportError(self.package_path, e)
     return sweep_obj
 
+class SourceCommand(Command):
+  def __init__(self, lineno, line, parse_result):
+    super(SourceCommand, self).__init__(lineno, line, parse_result)
+    self.source_file = parse_result.source_file
+
+  def execute(self, sweep_obj):
+    raise XenonError("A source command should never be executed here.")
+
 class GenerateCommand(Command):
   def __init__(self, lineno, line, parse_result):
     super(GenerateCommand, self).__init__(lineno, line, parse_result)
