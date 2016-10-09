@@ -8,6 +8,6 @@ illustrate Xenon's capabilities with the use case of designing a simple desk.
 
 There are three primary steps for building a design sweep with Xenon:
 
-1. [Define a data model](tutorial-datamodel.md)
-2. [Instantiate the data model](tutorial-datamodel.md)
+1. [Define a data model](tutorial-datamodel.md#defining-the-data-model)
+2. [Instantiate the data model](tutorial-datamodel.md#instantiating-the-data-model)
 3. [Write a Xenon sweep script](tutorial-sweepscript.md)

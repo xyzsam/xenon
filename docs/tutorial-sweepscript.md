@@ -67,38 +67,35 @@ generated. Take a look inside this file. It should look something like this
 (abbreviated):
 
   ```json
-	[
-		{
-			"ExhaustiveDesignSweep(\"myfirstsweep\")": {
-				"Desk(\"threelegdesk\")": {
-					"Top(\"top\")": {
-						"length": 10,
-						"width": 10,
+  [
+    {
+      "ExhaustiveDesignSweep(\"myfirstsweep\")": {
+        "Desk(\"threelegdesk\")": {
+          "Top(\"top\")": {
+            "length": 10,
+            "width": 10,
           },
           "Drawer(\"drawer\")": {
-						"length": 10,
-						"width": 10,
-						"height": 10,
-					},
+            "length": 10,
+            "width": 10,
+            "height": 10,
+          },
           "Leg(\"front_leg\")": {
-						"length": 10,
-						"diameter": 3,
-					},
-          /* And two more legs... */
+            "length": 10,
+            "diameter": 3,
+          },
          "material": "wood",
         },
-				"Desk(\"fourlegdesk\")": {
-          /* Drawer and top... */
+        "Desk(\"fourlegdesk\")": {
           "Leg(\"front_left_leg\")": {
-						"length": 10,
-						"diameter": 3,
-					},
-          /* And three more legs... */
+            "length": 10,
+            "diameter": 3,
+          },
          "material": "wood",
         },
       },
-    }
-	]
+    },
+  ]
   ```
 
 This JSON dump is the final output of Xenon. This JSON dump is probably not of
@@ -204,31 +201,31 @@ linear steps of 1, inclusively. Note: this sweep command applies each value of
 the sweep range to all objects in the selection at once. That is, for
 `threelegdesk`, it will generate the following sweep configurations:
 
-  | front_leg | back_left_leg | back_right_leg |
-  |:---------:|:-------------:|:--------------:|
-  | 1         | 1             | 1              |
-  | 2         | 2             | 2              |
-  | 3         | 3             | 3              |
-  | 4         | 4             | 4              |
-  | 5         | 5             | 5              |
+| front_leg | back_left_leg | back_right_leg |
+|:---------:|:-------------:|:--------------:|
+| 1         | 1             | 1              |
+| 2         | 2             | 2              |
+| 3         | 3             | 3              |
+| 4         | 4             | 4              |
+| 5         | 5             | 5              |
 
 It does *not* sweep each leg diameter independently, like so:
 
-  | front_leg | back_left_leg | back_right_leg |
-  |:---------:|:-------------:|:--------------:|
-  | 1         | 1             | 1              |
-  | 2         | 1             | 1              |
-  | 3         | 1             | 1              |
-  | 4         | 1             | 1              |
-  | 5         | 1             | 1              |
-  | 1         | 2             | 1              |
-  | 1         | 3             | 1              |
-  | 1         | 4             | 1              |
-  | 1         | 5             | 1              |
-  | 1         | 1             | 2              |
-  | 1         | 1             | 3              |
-  | 1         | 1             | 4              |
-  | 1         | 1             | 5              |
+| front_leg | back_left_leg | back_right_leg |
+|:---------:|:-------------:|:--------------:|
+| 1         | 1             | 1              |
+| 2         | 1             | 1              |
+| 3         | 1             | 1              |
+| 4         | 1             | 1              |
+| 5         | 1             | 1              |
+| 1         | 2             | 1              |
+| 1         | 3             | 1              |
+| 1         | 4             | 1              |
+| 1         | 5             | 1              |
+| 1         | 1             | 2              |
+| 1         | 1             | 3              |
+| 1         | 1             | 4              |
+| 1         | 1             | 5              |
 
 This behavior is currently not supported; it is planned for a future release of
 Xenon. Currently, if this latter behavior is the desired result, you must
@@ -251,11 +248,11 @@ If we omit the `linstep 1` clause, Xenon assumes a linear step size of 1.
 doubles the value each time. This sequence would produce the following sweep
 configurations:
 
-  | front_leg | back_left_leg | back_right_leg |
-  |:---------:|:-------------:|:--------------:|
-  | 2         | 5             | 5              |
-  | 4         | 5             | 5              |
-  | 8         | 5             | 5              |
+| front_leg | back_left_leg | back_right_leg |
+|:---------:|:-------------:|:--------------:|
+| 2         | 5             | 5              |
+| 4         | 5             | 5              |
+| 8         | 5             | 5              |
 
 If you want to sweep leg diameters with different values, this can be done
 without specifying separate attributes for each leg as long as the number of
@@ -269,11 +266,11 @@ values in the sweep ranges is the same:
 
 This produces the following sweep:
 
-  | front_leg | back_left_leg | back_right_leg |
-  |:---------:|:-------------:|:--------------:|
-  | 1         | 3             | 2              |
-  | 2         | 4             | 4              |
-  | 3         | 5             | 8              |
+| front_leg | back_left_leg | back_right_leg |
+|:---------:|:-------------:|:--------------:|
+| 1         | 3             | 2              |
+| 2         | 4             | 4              |
+| 3         | 5             | 8              |
 
 Again, note that each diameter is not individually swept; instead, each
 diameter is swept in parallel.
@@ -288,20 +285,20 @@ Here is an example of sweeping multiple parameters:
 This produces the following sweep (for brevity, all legs are collapsed into one
 column):
 
-  | top height | leg diameter |
-  |:----------:|:------------:|
-  | 2          | 1            |
-  | 3          | 1            |
-  | 4          | 1            |
-  | 5          | 1            |
-  | 2          | 2            |
-  | 3          | 2            |
-  | 4          | 2            |
-  | 5          | 2            |
-  | 2          | 3            |
-  | 3          | 3            |
-  | 4          | 3            |
-  | 5          | 3            |
+| top height | leg diameter |
+|:----------:|:------------:|
+| 2          | 1            |
+| 3          | 1            |
+| 4          | 1            |
+| 5          | 1            |
+| 2          | 2            |
+| 3          | 2            |
+| 4          | 2            |
+| 5          | 2            |
+| 2          | 3            |
+| 3          | 3            |
+| 4          | 3            |
+| 5          | 3            |
 
 Finally, we can use expressions in `sweep` commands too:
 
@@ -312,13 +309,13 @@ Finally, we can use expressions in `sweep` commands too:
 
 This produces the following sweep:
 
-  | leg_length | leg diameter |
-  |:----------:|:------------:|
-  | 10         | 2            |
-  | 15         | 3            |
-  | 20         | 4            |
-  | 25         | 5            |
-  | 30         | 6            |
+| leg_length | leg diameter |
+|:----------:|:------------:|
+| 10         | 2            |
+| 15         | 3            |
+| 20         | 4            |
+| 25         | 5            |
+| 30         | 6            |
 
 There are two things to note here:
 

@@ -89,7 +89,7 @@ relationships are specified through attributes.
 
 With this, we are done defining the data model! Now, let's instantiate some instances.
 
-# Instantiating instances of the data model #
+# Instantiating the data model #
 
 Let's define a collection of desk designs. For simplicity, our collection of
 designs differ structurally only in the number of legs (a real collection might
