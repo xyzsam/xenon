@@ -61,5 +61,9 @@ class SourceCommand(Common.CompleteSweepTest):
   def setUp(self):
     self.testcase = "source_test.xe"
 
+class MultiUseCommands(Common.CompleteSweepTest):
+  def setUp(self):
+    self.testcase = "multi_use_commands.xe"
+
 if __name__ == '__main__':
   unittest.main()

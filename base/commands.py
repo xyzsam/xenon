@@ -177,22 +177,36 @@ class UseCommand(Command):
 
   def execute(self, sweep_obj):
     target_obj = sweep_obj if sweep_obj else g.scope
-    path_terminator = self.package_path[-1]
+    # The last identifer of the path could be either a module or a member of a
+    # module, so always start by importing the parent. In the case that there
+    # is only one identifier to the path, then that path is the parent.
+    if len(self.package_path) > 2:
+      path_terminator = self.package_path[-1]
+      parent_module_path = ".".join(self.package_path[:-1])
+    else:
+      path_terminator = ""
+      parent_module_path = ".".join(self.package_path)
+
     try:
-      if path_terminator == LIT_STAR:
-        package_path_str = ".".join(self.package_path[:-1])
-      else:
-        package_path_str = ".".join(self.package_path)
-      package = importlib.import_module(package_path_str)
-      if path_terminator == LIT_STAR:
-        # Import everything into the global namespace.
-        for attr, val in package.__dict__.iteritems():
-          if isinstance(val, XenonObj) or isinstance(val, type):
-            target_obj.__dict__[attr] = copy.deepcopy(val)
-      else:
-        target_obj.__dict__[path_terminator] = package
+      parent_package = importlib.import_module(parent_module_path)
     except ImportError as e:
       raise XenonImportError(self.package_path, e)
+
+    if path_terminator == LIT_STAR:
+      # Import everything into the global namespace.
+      for attr, val in parent_package.__dict__.iteritems():
+        if isinstance(val, XenonObj) or isinstance(val, type):
+          target_obj.__dict__[attr] = copy.deepcopy(val)
+    elif path_terminator != "":
+      # Import the specified child item (which might be module itself).
+      try:
+        target_obj.__dict__[path_terminator] = getattr(parent_package, path_terminator)
+      except AttributeError as e:
+        raise XenonImportError(self.package_path, e)
+    else:
+      # There was no child specified for this path.
+      target_obj.__dict__[parent_module_path] = parent_package
+
     return sweep_obj
 
 class SourceCommand(Command):

@@ -352,7 +352,7 @@ class Sweepable(XenonObj):
     return "{0}(\"{1}\")".format(self.__class__.__name__, self.name)
 
   def __repr__(self):
-    return "{0}(name=\"{1}\",id={2})".format(self.__class__.__name__, self.name, self.id)
+    return "{0}(name=\"{1}\")".format(self.__class__.__name__, self.name)
 
 class BaseDesignSweep(Sweepable):
   sweepable_params = []

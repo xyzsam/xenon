@@ -1,0 +1,14 @@
+begin ExhaustiveSweep multi_use_commands
+
+use xenon.tests.machsuite.aes_aes
+use xenon.tests.machsuite.bfs_bulk
+
+generate configs
+
+# Set parameters.
+set output_dir "tmp" # A comment
+
+# Only sweep this variable.
+sweep cycle_time from 1 to 5
+
+end multi_use_commands
