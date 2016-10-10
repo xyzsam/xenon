@@ -7,6 +7,7 @@ syntatical structures. Command keywords are all lowercase. There is no support
 for multiline statements at this time.
 
 **Table of Contents**
+
 1. [Basic syntax constructs](#basic-syntax-constructs)
 2. [Commands](#commands)
 3. [Selections](#selections)
@@ -91,6 +92,10 @@ where:
   modified. See [selections](#selections) for more details. The pair of
   attribute and selection is valid as long as at least one object in the
   selection contains the named attribute.
+
+Throws:
+* `XenonSelectionError` if no objects in the selection have the named attribute.
+* `TypeError` if the selected object is not of type `XenonObj`.
 
 ## sweep ##
 
@@ -181,10 +186,12 @@ scope first and then at global scope. If the selection path was successfully
 resolved and the path does not have a terminating asterisk, then that object
 is returned. If the path does include a terminating asterisk, all children of
 type `Sweepable`are returned, *as well as the parent object*. This latter
-behavior was found to be very useful in certain cases.
+behavior was found to be very useful in certain cases.  If the selection path
+cannot be resolved, then a `XenonSelectionError` is raised.
 
-If the selection path cannot be resolved, then a `XenonSelectionError` is
-raised.
+Selections will only return objects of type `XenonObj`, the base class for all
+objects in the Xenon system. If the fully qualified path refers to an object which
+is not a `XenonObj`, a TypeError will be thrown.
 
 Selections never appear on their own, but rather as part of another command and
 are always preceded by the `for` keyword.
