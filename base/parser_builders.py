@@ -50,7 +50,7 @@ def buildExpressionParser():
   It will be parsed to create a mathematical expression tree which will then be
   evaluated.
   """
-  kws = MatchFirst(map(CaselessKeyword, [k for k in reserved.iterkeys()]))
+  kws = MatchFirst(map(Keyword, [k for k in reserved.iterkeys()]))
   valid_expression = Group(OneOrMore(Word(alphanums + "()/+-<>=._*")))
   return valid_expression.setResultsName("expression").setParseAction(convertToExpressionTree)
 
@@ -171,7 +171,7 @@ def buildCommandParser():
   command_keywords = []
   line_with_command = (
       SOL +
-      MatchFirst(map(CaselessKeyword, commands)).setResultsName("command") +
+      MatchFirst(map(Keyword, commands)).setResultsName("command") +
       Optional(Group(OneOrMore(Word(printables, excludeChars='#')))).setResultsName("rest") +
       comment
       )

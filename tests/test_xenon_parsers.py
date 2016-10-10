@@ -31,11 +31,11 @@ class BeginParser(Common.ParserTestCase):
   def setUp(self):
     self.parser = buildBeginParser()
     self.testcases = [("begin DesignSweep mysweep", True),
-                      ("BEGIN ExhaustiveSweep MySweep  ", True),
-                      ("  BeGIn ExhaustiveSweep sweep123", True),
                       ("begin CustomSweep sweep_nothing_2  ", True),
                       ("begin sweep sweepname", True),
                       ("begin Sweep sweep_nothing_2 extra", False),
+                      ("BEGIN ExhaustiveSweep MySweep  ", False),
+                      ("  BeGIn ExhaustiveSweep sweep123", False),
                       ("begin sweep 123sweep", False),
                       ("begin sweep sweep.$#", False),
                       ("begin sweep2", False),
@@ -47,7 +47,7 @@ class EndParser(Common.ParserTestCase):
   def setUp(self):
     self.parser = buildEndParser()
     self.testcases = [("end sweep", True),
-                      ("END SWEEP", True),
+                      ("END SWEEP", False),
                       ("END", False),
                       ("sweep", False),
                       ("END SWEEP mysweep", False)

@@ -1,5 +1,5 @@
 # All keywords.
-from pyparsing import CaselessKeyword, Literal
+from pyparsing import Keyword, Literal
 
 CMD_BEGIN = "begin"
 CMD_END = "end"
@@ -52,9 +52,9 @@ reserved = {}
 def buildKeywords():
   global reserved
   for command in commands:
-    reserved[command] = CaselessKeyword(command).setResultsName(command)
+    reserved[command] = Keyword(command).setResultsName(command)
   for other in other_keywords:
-    reserved[other] = CaselessKeyword(other).setResultsName(other)
+    reserved[other] = Keyword(other).setResultsName(other)
   for literal in special_literals:
     reserved[literal] = Literal(literal)
 
