@@ -41,13 +41,13 @@ class BeginAndEndCommands(CommandTestCase):
 class UseCommand(CommandTestCase):
   def test_normal(self):
     # Must import fully qualified name while we are under tests/.
-    self.executeCommand("use xenon.tests.test_module")
+    self.executeCommand("use xenon.tests.test_module.*")
     self.assertIn("USE_COMMAND_SWEEP_TEST_OBJ", self.sweep.__dict__)
 
   def test_global_import(self):
     """ Tests importing into global scope before a sweep is declared. """
     self.sweep = None
-    self.executeCommand("use xenon.tests.test_module")
+    self.executeCommand("use xenon.tests.test_module.*")
     self.assertIn("FakeDesignSweep", g.scope.__dict__)
     self.assertEqual(test_module.FakeDesignSweep, g.scope.__dict__["FakeDesignSweep"])
 

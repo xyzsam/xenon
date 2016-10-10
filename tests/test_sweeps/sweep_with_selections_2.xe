@@ -3,7 +3,7 @@
 
 begin ExhaustiveSweep selections_2
 
-use xenon.tests.machsuite
+use xenon.tests.machsuite.*
 
 generate configs
 

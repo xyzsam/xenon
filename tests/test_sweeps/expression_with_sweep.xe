@@ -1,6 +1,6 @@
 begin ExhaustiveSweep expr
 
-use xenon.tests.machsuite
+use xenon.tests.machsuite.*
 
 generate configs
 

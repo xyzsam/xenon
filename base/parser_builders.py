@@ -140,12 +140,14 @@ def buildUseParser():
 
   The use command behaves in a similar way as the Python import keyword, with
   the following differences:
-     - All use statements implicitly import everything (.*) inside the lowest
-       specified package/module into the global namespace, so wildcards are not
-       allowed.
      - Packages cannot be renamed with `as`.
+     - Objects and type definitions cannot be selectively imported from a
+       module; either import one item, the entire module, or everything under
+       the module.
   """
-  package_path = Group(delimitedList(ident, delim=".")).setResultsName("package_path")
+  package_path = Group(delimitedList(ident, delim=".") +
+                       Optional(Literal(".").suppress() + reserved[LIT_STAR])
+                       ).setResultsName("package_path")
   use_parser = reserved["use"] + package_path
   return use_parser
 

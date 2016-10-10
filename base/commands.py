@@ -177,12 +177,14 @@ class UseCommand(Command):
 
   def execute(self, sweep_obj):
     target_obj = sweep_obj if sweep_obj else g.scope
-    package_path_str = ".".join(self.package_path)
+    path_terminator = self.package_path[-1]
     try:
+      if path_terminator == LIT_STAR:
+        package_path_str = ".".join(self.package_path[:-1])
+      else:
+        package_path_str = ".".join(self.package_path)
       package = importlib.import_module(package_path_str)
-      path_terminator = "*"  # For now, import everything into global namespace.
-      # path_terminator = self.package_path[-1]
-      if path_terminator == "*":
+      if path_terminator == LIT_STAR:
         # Import everything into the global namespace.
         for attr, val in package.__dict__.iteritems():
           if isinstance(val, XenonObj) or isinstance(val, type):

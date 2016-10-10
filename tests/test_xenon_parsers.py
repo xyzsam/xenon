@@ -184,9 +184,12 @@ class UseParser(Common.ParserTestCase):
     self.testcases = [("use package", True),
                       ("use package_name.module", True),
                       ("use package.subpackage.module", True),
+                      ("use package.*", True),
+                      ("use package.something.*", True),
                       ("use", False),
-                      ("use package.*", False),
-                      ("use package.something.*", False),
+                      ("use *", False),
+                      ("use .*", False),
+                      ("use *.*", False),
                       ]
 
 class CommentParser(Common.ParserTestCase):
