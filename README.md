@@ -18,6 +18,11 @@ the JSON output into a form usable by his/her tool.
   2. [Xenon syntax](docs/xenon_syntax.md) - Syntax specification for the Xenon
      command language.
 
+Requirements
+------------
+Xenon requires the `pyparsing` module. Any version between 2.2.0 and 2.3.0
+(inclusive) is supported.
+
 Contact
 -------
 Sam Xi
