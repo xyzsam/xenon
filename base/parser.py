@@ -63,6 +63,8 @@ class XenonParser():
         except pp.ParseException as x:
           self.handleSyntaxError(x, line_number)
 
+        print("Parser result:")
+        print(result)
         command = getCommandClass(line_command)(line_number, line, result)
 
         if isinstance(command, SourceCommand):

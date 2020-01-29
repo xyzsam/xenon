@@ -45,6 +45,10 @@ class SelectionCommand(Command):
   def __init__(self, lineno, line, parse_result):
     """ Constructs a selection argument given a set of parsed tokens. """
     super(SelectionCommand, self).__init__(lineno, line, parse_result.selection)
+    self.parse_result = parse_result
+    print("Selection command:")
+    print(parse_result)
+    print(parse_result.selection)
     self.tokens = list(parse_result.selection)
 
   def select(self, env):
@@ -52,6 +56,7 @@ class SelectionCommand(Command):
 
     See common.select() for more details.
     """
+    print(self.parse_result.selection)
     return common.getSelectedObjs(self.tokens, env)
 
   def execute(self, env):
