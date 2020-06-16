@@ -20,8 +20,8 @@ BINDINGS_ = {
 
 # Rather than building the parser every time it is required, build them once
 # and return the built objects.
-PARSER_BUILDER_OBJS_ = dict(
-    (command, binding.parserBuilder()) for (command, binding) in BINDINGS_.iteritems())
+PARSER_BUILDER_OBJS_ = dict((command, binding.parserBuilder())
+                            for (command, binding) in BINDINGS_.items())
 
 def getParser(command):
   return PARSER_BUILDER_OBJS_[command]

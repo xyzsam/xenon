@@ -7,8 +7,7 @@ import unittest
 
 from xenon.base.datatypes import *
 import xenon.base.exceptions as xe
-from test_xenon_commands import CommandTestCase
-import test_module
+from xenon.tests.test_xenon_commands import CommandTestCase
 
 class ParamExceptions(CommandTestCase):
   def test_invalid_default_type(self):

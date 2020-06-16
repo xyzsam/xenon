@@ -8,7 +8,7 @@ import xenon.base.globalscope as g
 from xenon.base.commands import *
 from xenon.base.datatypes import Param
 
-import test_module
+from xenon.tests import test_module
 
 class CommandTestCase(unittest.TestCase):
   def setUp(self):

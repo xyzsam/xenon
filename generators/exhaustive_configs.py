@@ -107,7 +107,7 @@ class ConfigGenerator(base_generator.Generator):
     # of param ids, sort them, then get the appropriate index ranges. Splitting
     # it up this way lets us achieve the same result as applying np.argsort()
     # to both arrays without requiring numpy.
-    for param_id in param_range_len.iterkeys():
+    for param_id in param_range_len:
       id_list.append(param_id)
     id_list.sort()
     for param_id in id_list:
