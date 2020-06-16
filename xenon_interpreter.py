@@ -60,7 +60,6 @@ class XenonInterpreter():
   def execute(self):
     current_sweep = None
     for command in self.commands_:
-      print(command)
       try:
         current_sweep = command(current_sweep)
       except xe.XenonError as e:
