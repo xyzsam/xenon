@@ -195,7 +195,7 @@ class UseCommand(Command):
 
     if path_terminator == LIT_STAR:
       # Import everything into the global namespace.
-      for attr, val in parent_package.__dict__.iteritems():
+      for attr, val in parent_package.__dict__.items():
         if isinstance(val, XenonObj) or isinstance(val, type):
           target_obj.__dict__[attr] = copy.deepcopy(val)
     elif path_terminator != "":

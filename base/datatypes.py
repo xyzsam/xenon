@@ -1,7 +1,6 @@
 import itertools
 import math
 import pprint
-from types import *
 
 from xenon.base.keywords import *
 import xenon.base.exceptions as xe
@@ -51,11 +50,11 @@ class Param(XenonObj):
   # generated configs; that is, as long as the Xenon input file does not
   # change, then we should generate the exact same configurations in the exact
   # same order every time. This greatly simplifies testing.
-  next_id_ = itertools.count().next
+  id_ = itertools.count()
 
   def __init__(self, expected_type, name, default, valid_opts=None, format_func=None):
     super(Param, self).__init__()
-    self.id = Param.next_id_()
+    self.id = next(Param.id_)
     self.name = name
     self.default = default
     self.valid_opts = valid_opts
@@ -134,7 +133,7 @@ class BoolParam(Param):
     super(BoolParam, self).__init__(bool, *args, **kwargs)
 
 class UnassignedParamValue(XenonObj):
-  """ An object to represent a Param attribute without a value. 
+  """ An object to represent a Param attribute without a value.
 
   Attempting to convert this object into a float or int will raise a
   XenonTypeError.  This is preferable to assigning None to unassigned values,
@@ -174,9 +173,10 @@ class Sweepable(XenonObj):
   # Per-instance lists can be modified, but this list cannot.
   sweepable_params = []
 
-  builtins_ = [IntType, FloatType, StringType, DictType, ListType, NoneType,
-               BooleanType, LongType, ComplexType, TupleType, UnicodeType,
-               UnassignedParamValue]
+  builtins_ = [
+      int, float, str, dict, list, None, bool, complex, tuple,
+      UnassignedParamValue
+  ]
 
   def __init__(self, name):
     # We must add the user_attrs attribute before calling the super
@@ -256,11 +256,11 @@ class Sweepable(XenonObj):
 
   def iterparamids(self):
     """ Returns a generator over ids of swept parameters. """
-    return self.sweep_params_range_.iterkeys()
+    return self.sweep_params_range_
 
   def iterparamitems(self):
     """ Returns a generator over ids and ranges of swept parameters. """
-    return self.sweep_params_range_.iteritems()
+    return self.sweep_params_range_.items()
 
   def setSweepParameter(self, name, start, end, step, step_type):
     """ Sets the named sweep parameter with the given range.
@@ -286,7 +286,7 @@ class Sweepable(XenonObj):
 
     value_range = []
     if step_type == "linstep":
-      value_range = range(start, end+1, step)
+      value_range = list(range(start, end + 1, step))
     elif step_type == "expstep":
       value_range = [start * (step ** exp)
                      for exp in range(0, int(math.log(end/start, step))+1)]
@@ -329,7 +329,7 @@ class Sweepable(XenonObj):
     # First, generate the sweepable params and their values.
     key = str(self)
     set_params = self.getSweepableParamsAndValues()
-    for param in set_params.iterkeys():
+    for param in set_params:
       if self.hasSweepParamRange(param):
         set_params[param] = self.getSweepParamRange(param)
     output = set_params

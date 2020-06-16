@@ -28,13 +28,13 @@ def getSelectedObjs(select_tokens, env):
     select_tokens.append(LIT_STAR)
 
   current_view = env
-  for token in select_tokens:
+  for token in select_tokens[0]:
     if token == LIT_STAR:
       break
     try:
       current_view = getattr(current_view, token)
     except AttributeError:
-      raise xe.XenonSelectionError(".".join(select_tokens))
+      raise xe.XenonSelectionError(".".join(select_tokens[0]))
 
   selected_objs = []
   if token == LIT_STAR:

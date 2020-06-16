@@ -1,6 +1,6 @@
 # A simplified benchmark suite for testing purposes.
 
-from datatypes import *
+from xenon.tests.datatypes import *
 
 aes_aes = Benchmark("aes-aes")
 aes_aes.add_array("ctx", 96, 1)

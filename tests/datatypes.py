@@ -2,7 +2,7 @@
 
 from xenon.base.datatypes import Sweepable
 
-import params as params
+import xenon.tests.params as params
 
 class Benchmark(Sweepable):
   sweepable_params = [

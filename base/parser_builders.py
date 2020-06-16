@@ -50,7 +50,7 @@ def buildExpressionParser():
   It will be parsed to create a mathematical expression tree which will then be
   evaluated.
   """
-  kws = MatchFirst(map(Keyword, [k for k in reserved.iterkeys()]))
+  kws = MatchFirst(map(Keyword, [k for k in reserved]))
   valid_expression = Group(OneOrMore(Word(alphanums + "()/+-<>=._*")))
   return valid_expression.setResultsName("expression").setParseAction(convertToExpressionTree)
 
